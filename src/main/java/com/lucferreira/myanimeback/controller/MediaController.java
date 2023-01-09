@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 @RestController
@@ -30,7 +32,7 @@ public class MediaController {
     public ResponseEntity<MediaDto> updateMedia(@PathVariable String type,
                                                 @PathVariable Long id,
                                                 @RequestBody MediaForm mediaForm) {
-        MediaDto media = mediaService.getMedia(type, id);
+        MediaDto media = mediaService.updateMedia(mediaForm,id);
         return ResponseEntity.ok(media);
     }
 
@@ -38,12 +40,14 @@ public class MediaController {
     public ResponseEntity<MediaDto> deleteMedia(@PathVariable String type,
                                                 @PathVariable Long id) {
         MediaDto media = mediaService.getMedia(type, id);
+        mediaService.deleteMedia(type, id);
         return ResponseEntity.ok(media);
     }
 
     @PostMapping("/{type:animes|mangas}")
-    public ResponseEntity<MediaDto> createMedia(@RequestBody MediaForm mediaForm) {
+    public ResponseEntity<MediaDto> createMedia(@PathVariable String type,@RequestBody MediaForm mediaForm) throws URISyntaxException {
         MediaDto mediaDto = mediaService.createMedia(mediaForm);
-        return ResponseEntity.status(200).body(mediaDto);
+        var createdUri = new URI(String.format("/%s/",type) + mediaDto.getId());
+        return ResponseEntity.created(createdUri).body(mediaDto);
     }
 }

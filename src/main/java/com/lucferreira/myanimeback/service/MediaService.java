@@ -4,6 +4,7 @@ import com.lucferreira.myanimeback.model.media.MediaDto;
 import com.lucferreira.myanimeback.model.media.MediaForm;
 import com.lucferreira.myanimeback.repository.MediaRepository;
 import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -39,6 +40,25 @@ public class MediaService {
         return Media.toDto(optionalMedia.get());
     }
 
+    public MediaDto updateMedia(MediaForm mediaForm, Long id){
+
+        Media toUpdateMedia = Media.fromForm(mediaForm,id);
+        Media updatedMedia = saveMedia(toUpdateMedia);
+
+        return Media.toDto(updatedMedia);
+    }
+
+    public MediaDto deleteMedia(String type, Long id){
+        String realType = getRealType(type);
+        Optional<Media> optionalMedia = mediaRepository.findByTypeAndId(realType,id);
+        if(optionalMedia.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,String.format("%s with id %d not found",realType,id));
+        }
+        Media media = optionalMedia.get();
+        deleteMedia(media);
+        return Media.toDto(media);
+    }
+
     public MediaDto createMedia(MediaForm mediaForm) {
         System.out.println(mediaForm.getName());
         Media newMedia = Media.fromForm(mediaForm);
@@ -56,8 +76,20 @@ public class MediaService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    private void deleteMedia(Media media){
+        try {
+         mediaRepository.delete(media);
+        } catch (DataIntegrityViolationException  e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        } catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT);
+        } catch (PersistenceException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     private String getRealType(String mediaType){
-        if (mediaType.equals("mangas")) {
+        if (mediaType.equals("mangas") || mediaType.equals("manga")) {
             return "manga";
         }
         return "anime";

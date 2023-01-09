@@ -51,6 +51,26 @@ public class Media  {
 
     private String mediaType;
 
+    public static Media fromForm(MediaForm mediaForm, Long id) {
+
+        return new Media.Builder()
+                .id(id)
+                .name(mediaForm.getName())
+                .members(mediaForm.getMembers())
+                .score(mediaForm.getScore())
+                .scoreCount(mediaForm.getScoreCount())
+                .rankedPosition(mediaForm.getRankedPosition())
+                .popularityPosition(mediaForm.getPopularityPosition())
+                .favoritesCount(mediaForm.getFavoritesCount())
+                .imageUrl(mediaForm.getImageUrl())
+                .myanimelistUrl(mediaForm.getMyanimelistUrl())
+                .type(mediaForm.getType())
+                .startDate(mediaForm.getStartDate())
+                .endDate(mediaForm.getEndDate())
+                .status(mediaForm.getStatus())
+                .mediaType(mediaForm.getMediaType())
+                .build();
+    }
     public static Media fromForm(MediaForm mediaForm) {
 
         return new Media.Builder()
@@ -70,7 +90,6 @@ public class Media  {
                 .mediaType(mediaForm.getMediaType())
                 .build();
     }
-
 
     public Long getId() {
         return id;
