@@ -1,14 +1,15 @@
 package com.lucferreira.myanimeback.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+
 public class WaybackUnavailableException extends WaybackException{
 
-    public WaybackUnavailableException(){
 
-    }
-    public WaybackUnavailableException(Exception e){
-        super(e);
+    public WaybackUnavailableException(HttpStatusCode status,String msg){
+        super(status,msg);
     }
     public WaybackUnavailableException(String msg){
-        super(msg);
+        super(HttpStatus.SERVICE_UNAVAILABLE,msg);
     }
 }

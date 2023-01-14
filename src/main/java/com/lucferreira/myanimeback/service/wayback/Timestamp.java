@@ -2,6 +2,7 @@ package com.lucferreira.myanimeback.service.wayback;
 
 import com.lucferreira.myanimeback.exception.WaybackException;
 import com.lucferreira.myanimeback.exception.WaybackTimestampParseException;
+import com.lucferreira.myanimeback.util.Regex;
 
 import java.sql.Time;
 import java.text.ParseException;
@@ -15,12 +16,13 @@ public class Timestamp {
     private Date date;
     private String originalValue;
     public Timestamp(String value) throws WaybackTimestampParseException {
+        String pattern = "(\\d{4})(\\d{2})(\\d{2})";
+        this.originalValue = Regex.match(value,pattern);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         try{
-            this.date = sdf.parse(value);
-            this.originalValue = value;
+            this.date = sdf.parse(originalValue);
         }catch (ParseException e){
-            throw new WaybackTimestampParseException(e);
+            throw new WaybackTimestampParseException(String.format( "Unable to parse timestamp: '%s' format should be yyyyMMdd",value));
         }
     }
 

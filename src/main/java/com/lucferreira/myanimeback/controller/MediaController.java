@@ -1,8 +1,11 @@
 package com.lucferreira.myanimeback.controller;
 
+import com.lucferreira.myanimeback.exception.WaybackException;
 import com.lucferreira.myanimeback.model.media.MediaDto;
 import com.lucferreira.myanimeback.model.media.MediaForm;
 import com.lucferreira.myanimeback.service.MediaService;
+import com.lucferreira.myanimeback.service.wayback.ResponseSnapshot;
+import com.lucferreira.myanimeback.service.wayback.WaybackMachineClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,11 +13,14 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
+@RequestMapping("/api/media")
 public class MediaController {
     @Autowired
     private MediaService mediaService;
+
 
     @GetMapping("/{type:animes|mangas}")
     public ResponseEntity<List<MediaDto>> list(@PathVariable String type) {
@@ -50,4 +56,6 @@ public class MediaController {
         var createdUri = new URI(String.format("/%s/",type) + mediaDto.getId());
         return ResponseEntity.created(createdUri).body(mediaDto);
     }
+
+
 }
