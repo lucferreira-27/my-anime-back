@@ -1,5 +1,6 @@
 package com.lucferreira.myanimeback.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lucferreira.myanimeback.service.wayback.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

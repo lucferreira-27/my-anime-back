@@ -1,5 +1,7 @@
 package com.lucferreira.myanimeback.service.wayback;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lucferreira.myanimeback.exception.WaybackException;
 import com.lucferreira.myanimeback.exception.WaybackTimestampParseException;
 import com.lucferreira.myanimeback.exception.WaybackUnavailableException;
@@ -12,9 +14,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Array;
 import java.sql.Time;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class WaybackMachineClient {
@@ -38,16 +39,43 @@ public class WaybackMachineClient {
         List<CalendarSimpleItem> calendarSimpleItems = calendarCaptures.completeAllItemDate(year);
         return calendarSimpleItems;
 
-        /*
-        for (Timestamp timestamp :  timestamps) {
-            ResponseSnapshot responseSnapshot = getSnapshot(url,timestamp.toString());
-            responseSnapshots.add(responseSnapshot);
-        }
-
-        return responseSnapshots;
-     */
     }
 
+
+    public Optional<List<ResponseSnapshot>> getTimeMap(String url) throws WaybackException {
+        String endpoint = "https://web.archive.org/web/timemap/json?url=" + url;
+        ArrayList<ArrayList<String>> body = fetchSnapshotBody(endpoint);
+
+        if (body == null || body.size() == 0) {
+            throw new WaybackUnavailableException("No snapshots found for the URL: " + url);
+        }
+
+        List<String> keys = body.get(0);
+        List<Map<String, String>> snapshotList = createSnapshotList(body, keys);
+        List<ResponseSnapshot> responseSnapshots = convertToResponseSnapshots(snapshotList);
+
+        return Optional.of(responseSnapshots);
+    }
+    private Optional<ResponseSnapshot> getTimeMap(String url, String targetTimestamp) {
+        Optional<List<ResponseSnapshot>> optional = getTimeMap(url);
+        if (optional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<ResponseSnapshot> responseSnapshots = optional.get();
+        Timestamp targetTimestampObj = Timestamp.valueOf(targetTimestamp);
+
+        return responseSnapshots
+                .stream()
+                .min(Comparator.comparingLong(responseSnapshot -> getTimestampDifference(responseSnapshot.getTimestamp(), targetTimestampObj)));
+    }
+
+    private long getTimestampDifference(Timestamp timestamp1, Timestamp timestamp2) {
+        long timestamp1Long = timestamp1.getDate().getTime();
+        long timestamp2Long = timestamp2.getDate().getTime();
+
+        return Math.abs(timestamp1Long - timestamp2Long);
+    }
 
     public ResponseSnapshot getFirstSnapshot(String url) throws WaybackException {
         // These timestamps will be used to search for the earliest snapshot of the given url
@@ -62,14 +90,25 @@ public class WaybackMachineClient {
         }
         throw new WaybackUnavailableException("The first snapshot for this url was not found");
     }
-
     public ResponseSnapshot getSnapshot(String url) throws WaybackException {
+
+        Optional<List<ResponseSnapshot>> optional = getTimeMap(url);
+        if(optional.isPresent()){
+            List<ResponseSnapshot> responseSnapshots = optional.get();
+            return responseSnapshots.get(responseSnapshots.size() - 1);
+        }
         String endpoint = "http://archive.org/wayback/available?url=" + url;
         ResponseSnapshot snapshot = requestSnapshot(endpoint,"");
         return snapshot;
     }
 
     public ResponseSnapshot getSnapshot(String url, String  timestamp) throws WaybackException {
+
+        Optional<ResponseSnapshot> optional = getTimeMap(url,timestamp);
+        if(optional.isPresent()){
+            ResponseSnapshot responseSnapshot =  optional.get();
+            return responseSnapshot;
+        }
 
         String endpoint = "http://archive.org/wayback/available?url=" + url + (!timestamp.isEmpty() ? "&timestamp=" + timestamp : "");
         ResponseSnapshot snapshot = requestSnapshot(endpoint,timestamp);
@@ -119,5 +158,36 @@ public class WaybackMachineClient {
         String snapshotStatus = closest.getStatus();
         ResponseSnapshot snapshot = new ResponseSnapshot(snapshotUrl, snapshotTimestamp, snapshotStatus);
         return  snapshot;
+    }
+
+    private ArrayList fetchSnapshotBody(String endpoint) {
+        ResponseEntity<ArrayList> response = restTemplate.getForEntity(endpoint, ArrayList.class);
+        return response.getBody();
+    }
+    private List<Map<String, String>> createSnapshotList(ArrayList<ArrayList<String>> body, List<String> keys) {
+        List<Map<String, String>> snapshotList = new ArrayList<>();
+        for (int i = 1; i < body.size(); i++) {
+            Map<String, String> snapshot = createSnapshot(keys, body.get(i));
+            snapshotList.add(snapshot);
+        }
+        return snapshotList;
+    }
+    private Map<String, String> createSnapshot(List<String> keys, List<String> values) {
+        Map<String, String> snapshot = new HashMap<>();
+        for (int j = 0; j < keys.size(); j++) {
+            snapshot.put(keys.get(j), values.get(j));
+        }
+        return snapshot;
+    }
+    private List<ResponseSnapshot> convertToResponseSnapshots(List<Map<String, String>> snapshotList) {
+        List<ResponseSnapshot> responseSnapshots = new ArrayList<>();
+        for (Map<String, String> snapshot : snapshotList) {
+            ResponseSnapshot responseSnapshot = new ResponseSnapshot(
+                    snapshot.get("original"),
+                    snapshot.get("timestamp"),
+                    snapshot.get("statuscode"));
+            responseSnapshots.add(responseSnapshot);
+        }
+        return responseSnapshots;
     }
 }

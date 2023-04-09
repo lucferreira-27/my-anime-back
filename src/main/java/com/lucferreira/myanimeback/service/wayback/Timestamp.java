@@ -60,6 +60,9 @@ public class Timestamp {
         Timestamp timestamp = (Timestamp) o;
         return Objects.equals(date, timestamp.date) && Objects.equals(originalValue, timestamp.originalValue);
     }
+    public static Timestamp valueOf(String value){
+        return new Timestamp(value);
+    }
 
     @Override
     public int hashCode() {
