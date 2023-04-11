@@ -6,6 +6,7 @@ import com.lucferreira.myanimeback.exception.WaybackException;
 import com.lucferreira.myanimeback.exception.WaybackTimestampParseException;
 import com.lucferreira.myanimeback.exception.WaybackUnavailableException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -19,26 +20,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class WaybackMachineClient {
-    private final String waybackUrl = "http://archive.org/wayback/available?url=";
     private final RestTemplate restTemplate;
 
     @Autowired
     public WaybackMachineClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-    }
-
-
-
-    public List<CalendarSimpleItem> getSnapshotsByYear(String url, int year) throws WaybackException {
-
-        List<ResponseSnapshot> responseSnapshots = new ArrayList<>();
-
-        String urlTemplate = "https://web.archive.org/__wb/calendarcaptures/2?url=%s&date=%d&groupby=day";
-        String endpoint = String.format(urlTemplate,url,year);
-        CalendarCaptures calendarCaptures = requestCalendarCaptures(endpoint);
-        List<CalendarSimpleItem> calendarSimpleItems = calendarCaptures.completeAllItemDate(year);
-        return calendarSimpleItems;
-
     }
 
 
@@ -77,82 +63,40 @@ public class WaybackMachineClient {
         return Math.abs(timestamp1Long - timestamp2Long);
     }
 
-    public ResponseSnapshot getFirstSnapshot(String url) throws WaybackException {
-        // These timestamps will be used to search for the earliest snapshot of the given url
-        var firstTimestampOptions = Arrays.asList("0","-1","1970");
-        for (String timestamp : firstTimestampOptions){
-            try{
-                ResponseSnapshot responseSnapshot = getSnapshot(url,timestamp);
-                return  responseSnapshot;
-            }catch (WaybackUnavailableException e){
-                continue;
-            }
-        }
-        throw new WaybackUnavailableException("The first snapshot for this url was not found");
-    }
-    public ResponseSnapshot getSnapshot(String url) throws WaybackException {
+
+    public List<ResponseSnapshot> getSnapshotList(String url) throws WaybackException {
 
         Optional<List<ResponseSnapshot>> optional = getTimeMap(url);
         if(optional.isPresent()){
             List<ResponseSnapshot> responseSnapshots = optional.get();
-            return responseSnapshots.get(responseSnapshots.size() - 1);
+            return responseSnapshots;
         }
-        String endpoint = "http://archive.org/wayback/available?url=" + url;
-        ResponseSnapshot snapshot = requestSnapshot(endpoint,"");
-        return snapshot;
+        throw new WaybackException(HttpStatus.NOT_FOUND, "No snapshots found for the URL: " + url);
     }
 
-    public ResponseSnapshot getSnapshot(String url, String  timestamp) throws WaybackException {
 
-        Optional<ResponseSnapshot> optional = getTimeMap(url,timestamp);
-        if(optional.isPresent()){
-            ResponseSnapshot responseSnapshot =  optional.get();
-            return responseSnapshot;
+    public List<ResponseSnapshot> getSnapshotsInRange(String url, String beginTimestamp, Optional<String> optionalEnd) throws WaybackException {
+        Optional<List<ResponseSnapshot>> optional = getTimeMap(url);
+        if (optional.isEmpty()) {
+            throw new WaybackException(HttpStatus.NOT_FOUND, "No snapshots found for the URL within the specified time range: " + url);
         }
-
-        String endpoint = "http://archive.org/wayback/available?url=" + url + (!timestamp.isEmpty() ? "&timestamp=" + timestamp : "");
-        ResponseSnapshot snapshot = requestSnapshot(endpoint,timestamp);
-        return snapshot;
+        List<ResponseSnapshot> responseSnapshots = optional.get();
+        List<ResponseSnapshot> filteredSnapshots = filterSnapshots(responseSnapshots, beginTimestamp, optionalEnd);
+        if (filteredSnapshots.isEmpty()) {
+            throw new WaybackException(HttpStatus.NOT_FOUND, "No snapshots found for the URL within the specified time range: " + url);
+        }
+        return filteredSnapshots;
+    }
+    private List<ResponseSnapshot> filterSnapshots(List<ResponseSnapshot> responseSnapshots, String beginTimestamp, Optional<String> endTimestamp) {
+        return responseSnapshots.stream()
+                .filter(snapshot -> {
+                    String timestamp = snapshot.getTimestamp().getOriginalValue();
+                    return timestamp.compareTo(beginTimestamp) >= 0 && (endTimestamp.isEmpty()  || timestamp.compareTo(endTimestamp.get()) <= 0);
+                })
+                .collect(Collectors.toList());
     }
 
-    private ResponseSnapshot requestSnapshot(String endpoint, String timestamp) throws WaybackException {
-
-
-        ResponseEntity<WaybackResponse> response = restTemplate.getForEntity(endpoint, WaybackResponse.class);
-        final HttpStatusCode statusCode = response.getStatusCode();
-        final String serviceErrorMsg = String.format("Wayback Machine service is currently unavailable. Response status: %s",statusCode);
-
-        if(response.getStatusCode().is5xxServerError() || response.getStatusCode().is4xxClientError()){
-            throw new WaybackUnavailableException(serviceErrorMsg);
-        }
-
-        WaybackResponse body = response.getBody();
-        if (body == null) {
-           String unexpectedBodyMessage =
-                    String.format("The request to the Wayback Machine service returned a null body. " +
-                            "This may indicate that the service is currently unavailable or that the requested timestamp is not present in the archive. " +
-                            "Please try again later or check the validity of the timestamp and endpoint. timestamp: %s, endpoint: %s"
-                            ,timestamp.isEmpty() ? null : timestamp,endpoint);
-            throw new WaybackUnavailableException(unexpectedBodyMessage);
-        }
-        final String notFoundErrorMsg = String.format("Timestamp '%s' not found in Wayback Machine's archive for endpoint: %s",timestamp, endpoint);
-
-        if (body.getArchivedSnapshots() == null) {
-            throw new WaybackUnavailableException(notFoundErrorMsg);
-        }
-        Closest closest = body.getArchivedSnapshots().getClosest();
-        if (closest == null || !closest.isAvailable()) {
-            throw new WaybackUnavailableException(notFoundErrorMsg);
-        }
-        ResponseSnapshot snapshot = getResponseSnapshot(closest);
-        return snapshot;
-    }
-    private CalendarCaptures requestCalendarCaptures(String endpoint) throws WaybackException {
-        ResponseEntity<CalendarCaptures> response = restTemplate.getForEntity(endpoint, CalendarCaptures.class);
-        CalendarCaptures calendarCaptures = response.getBody();
-        return calendarCaptures;
-    }
-    public ResponseSnapshot getResponseSnapshot(Closest closest) throws WaybackTimestampParseException{
+    private ResponseSnapshot getResponseSnapshot(Closest closest) throws WaybackTimestampParseException{
         String snapshotUrl = closest.getUrl();
         String snapshotTimestamp = closest.getTimestamp();
         String snapshotStatus = closest.getStatus();
@@ -162,6 +106,11 @@ public class WaybackMachineClient {
 
     private ArrayList fetchSnapshotBody(String endpoint) {
         ResponseEntity<ArrayList> response = restTemplate.getForEntity(endpoint, ArrayList.class);
+        final HttpStatusCode statusCode = response.getStatusCode();
+        final String serviceErrorMsg = String.format("Wayback Machine service is currently unavailable. Response status: %s",statusCode);
+        if(response.getStatusCode().is5xxServerError() || response.getStatusCode().is4xxClientError()){
+            throw new WaybackUnavailableException(serviceErrorMsg);
+        }
         return response.getBody();
     }
     private List<Map<String, String>> createSnapshotList(ArrayList<ArrayList<String>> body, List<String> keys) {
@@ -182,10 +131,11 @@ public class WaybackMachineClient {
     private List<ResponseSnapshot> convertToResponseSnapshots(List<Map<String, String>> snapshotList) {
         List<ResponseSnapshot> responseSnapshots = new ArrayList<>();
         for (Map<String, String> snapshot : snapshotList) {
-            ResponseSnapshot responseSnapshot = new ResponseSnapshot(
-                    snapshot.get("original"),
-                    snapshot.get("timestamp"),
-                    snapshot.get("statuscode"));
+            String timestamp = snapshot.get("timestamp");
+            String original = snapshot.get("original");
+            String statusCode = snapshot.get("statuscode");
+            String snapshotUrl = String.format("https://web.archive.org/web/%s/%s", timestamp, original);
+            ResponseSnapshot responseSnapshot = new ResponseSnapshot(snapshotUrl, timestamp, statusCode);
             responseSnapshots.add(responseSnapshot);
         }
         return responseSnapshots;

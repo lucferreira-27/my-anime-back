@@ -1,11 +1,15 @@
 package com.lucferreira.myanimeback.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.lucferreira.myanimeback.exception.WaybackTimestampParseException;
 import com.lucferreira.myanimeback.service.wayback.*;
+import com.lucferreira.myanimeback.util.Regex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class WaybackService {
@@ -17,14 +21,19 @@ public class WaybackService {
         this.waybackMachineClient = waybackMachineClient;
     }
 
-    public ResponseSnapshot getSnapshot(String url){
-        return getSnapshotByTimestamp(url,"");
+    public List<ResponseSnapshot> getSnapshotList(String url){
+
+        return waybackMachineClient.getSnapshotList(url);
     }
-    public ResponseSnapshot getSnapshotByTimestamp(String url, String timestamp){
-        return waybackMachineClient.getSnapshot(url,timestamp);
+    public List<ResponseSnapshot> getSnapshotByTimestamp(String url, String timestamp){
+        String [] timestamps = timestamp.contains(",") ? timestamp.split(",") : new String[]{timestamp};
+        if(timestamps.length == 0 || timestamps.length > 2){
+            throw new WaybackTimestampParseException("Invalid timestamp format. Timestamp should be a comma-separated range of 4 to 14 digits. Example: 20200305120000,20200306120000");
+        }
+        if(timestamps.length == 2){
+            return waybackMachineClient.getSnapshotsInRange(url, timestamps[0], Optional.of(timestamps[1]));
+        }
+        return waybackMachineClient.getSnapshotsInRange(url,timestamps[0], Optional.empty());
     }
-    public List<CalendarSimpleItem> calendarListByYear(String url, int year){
-        List<CalendarSimpleItem> results = waybackMachineClient.getSnapshotsByYear(url,year);
-        return  results;
-    }
+
 }

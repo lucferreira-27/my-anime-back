@@ -16,15 +16,45 @@ public class Timestamp {
     private Date date;
     private String originalValue;
     public Timestamp(String value) throws WaybackTimestampParseException {
-        String pattern = "(\\d{4})(\\d{2})(\\d{2})";
-        this.originalValue = Regex.match(value,pattern);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        try{
-            this.date = sdf.parse(originalValue);
-        }catch (ParseException e){
-            throw new WaybackTimestampParseException(String.format( "Unable to parse timestamp: '%s' format should be yyyyMMdd",value));
+        this.originalValue = value;
+        this.date = parseDate(value);
+    }
+
+    private static Date parseDate(String value) throws WaybackTimestampParseException {
+        try {
+
+            String pattern = "^(\\d{4})(\\d{0,2}){0,5}$";
+            String originalValue = Regex.match(value, pattern);
+            String format;
+            switch (originalValue.length()) {
+                case 4:
+                    format = "yyyy";
+                    break;
+                case 6:
+                    format = "yyyyMM";
+                    break;
+                case 8:
+                    format = "yyyyMMdd";
+                    break;
+                case 10:
+                    format = "yyyyMMddHH";
+                    break;
+                case 12:
+                    format = "yyyyMMddHHmm";
+                    break;
+                case 14:
+                    format = "yyyyMMddHHmmss";
+                    break;
+                default:
+                    throw new ParseException("Invalid timestamp format", 0);
+            }
+            return new SimpleDateFormat(format).parse(originalValue);
+        } catch (ParseException e) {
+            throw new WaybackTimestampParseException(String.format("Unable to parse timestamp: '%s' format should be yyyyMMdd, yyyyMM or yyyy", value));
         }
     }
+
+
 
     public Date getDate(){
         return this.date;
