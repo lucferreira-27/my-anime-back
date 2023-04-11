@@ -1,174 +1,115 @@
 package com.lucferreira.myanimeback.service.wayback;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lucferreira.myanimeback.exception.WaybackException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.lucferreira.myanimeback.exception.WaybackUnavailableException;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
-import java.io.IOException;
-import java.sql.Date;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import static org.mockito.Mockito.*;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+class WaybackMachineClientTest {
+    private RestTemplate restTemplate;
+    private WaybackMachineClient waybackMachineClient;
+    private WaybackSnapshotFetcher snapshotFetcherSpy;
+    @BeforeEach
+    void setUp() {
+        restTemplate = mock(RestTemplate.class);
+        snapshotFetcherSpy = spy(new WaybackSnapshotFetcher(restTemplate));
+        waybackMachineClient = new WaybackMachineClient(restTemplate, snapshotFetcherSpy);
+    }
 
-@ExtendWith(MockitoExtension.class)
-public class WaybackMachineClientTest {
+    @Test
+    void getSnapshotList_ReturnsSnapshots_WhenSnapshotsFound() throws WaybackException {
+        // Arrange
+        String url = "https://example.com";
+        WaybackMachineClient waybackMachineClientSpy = spy(waybackMachineClient);
+        doReturn(Optional.of(createSampleResponseSnapshots())).when(snapshotFetcherSpy).getTimeMap(anyString());
 
-        @Mock
-        private  RestTemplate restTemplate;
+        // Act
+        List<ResponseSnapshot> result = waybackMachineClientSpy.getSnapshotList(url);
 
+        // Assert
+        assertEquals(2, result.size());
+    }
 
-        @Test
-        void testGetTimeMap() throws WaybackException, JsonProcessingException {
-                // prepare test data
-                String url = "http://myanimelist.net/anime/21/One_Piece";
-                Object[] array1 = new Object[] {
-                        "urlkey", "timestamp", "original", "mimetype", "statuscode",
-                        "digest", "redirect", "robotflags", "length", "offset", "filename"
-                };
-                Object[] array2 = new Object[] {
-                        "net,myanimelist)/anime/21/one_piece", "20080904102954",
-                        "http://myanimelist.net:80/anime/21/One_Piece", "text/html", "200",
-                        "CQV3LVIQC4IFVISYOHTYNOHGHGLC6EPT", "-", "-", "27890", "17458671",
-                        "52_5_20080904100919_crawl101-c/52_5_20080904102851_crawl104.arc.gz"
-                };
-                Object[] array3 = new Object[] {
-                        "net,myanimelist)/anime/21/one_piece", "20080908015513",
-                        "http://myanimelist.net:80/anime/21/One_Piece", "text/html", "200",
-                        "7Q62AD3ECS7WB5UG3UUDXMEKU5KEBES4", "-", "-", "27907", "20685994",
-                        "51_5_20080907235419_crawl105-c/51_5_20080908015349_crawl104.arc.gz"
-                };
-                Object[] array4 = new Object[] {
-                        "net,myanimelist)/anime/21/one_piece", "20080909090825",
-                        "http://myanimelist.net:80/anime/21/One_Piece", "text/html", "200",
-                        "R34LGIGB6DHX3IHCLQPL4CQ42QI2IJV7", "-", "-", "28067", "5223970",
-                        "51_5_20080909071035_crawl108-c/51_5_20080909090814_crawl104.arc.gz"
-                };
-                Object[][] snapshotsArray = new Object[][] { array1, array2, array3, array4 };
-                ResponseEntity<Object[]> response = new ResponseEntity<>(snapshotsArray, HttpStatus.OK);
-                when(restTemplate.getForEntity(anyString(), eq(Object[].class))).thenReturn(response);
-                WaybackMachineClient waybackMachineClient = new WaybackMachineClient(restTemplate);
+    @Test
+    void getSnapshotList_ThrowsWaybackException_WhenNoSnapshotsFound() {
+        // Arrange
+        String url = "https://example.com";
+        WaybackMachineClient waybackMachineClientSpy = spy(waybackMachineClient);
+        doReturn(Optional.empty()).when(snapshotFetcherSpy).getTimeMap(anyString());
 
-                // call the method being tested
-                Optional<List<ResponseSnapshot>> optionalSnapshots = waybackMachineClient.getTimeMap(url);
-                List<ResponseSnapshot> actualSnapshots = optionalSnapshots.get();
-                // assert the result
-                assertEquals(3, actualSnapshots.size());
-                assertEquals("20080904", actualSnapshots.get(0).getTimestamp().getOriginalValue());
-                assertEquals("http://myanimelist.net:80/anime/21/One_Piece", actualSnapshots.get(0).getUrl());
-                assertEquals("20080908", actualSnapshots.get(1).getTimestamp().getOriginalValue());
-                assertEquals("http://myanimelist.net:80/anime/21/One_Piece", actualSnapshots.get(1).getUrl());
-                assertEquals("20080909", actualSnapshots.get(2).getTimestamp().getOriginalValue());
-                assertEquals("http://myanimelist.net:80/anime/21/One_Piece", actualSnapshots.get(2).getUrl());
-        }
+        // Act and Assert
+        assertThrows(WaybackException.class, () -> waybackMachineClientSpy.getSnapshotList(url));
+    }
 
-        @Test
-        void getSnapshotsByYear() {
-        }
+    @ParameterizedTest
+    @CsvSource({
+            "20220101, 20220401, 2",
+            "20220101, 20220301, 1"
+    })
+    void getSnapshotsInRange_ReturnsFilteredSnapshots(String beginTimestamp, String endTimestamp, int expectedSize) throws WaybackException {
+        // Arrange
+        String url = "https://example.com";
+        WaybackMachineClient waybackMachineClientSpy = spy(waybackMachineClient);
+        doReturn(Optional.of(createSampleResponseSnapshots())).when(snapshotFetcherSpy).getTimeMap(anyString());
 
-        @Test
-        void getSnapshotFirst_WaybackResponseContainsValidSnapshotWithTimestampReset_ValidResponseSnapshotReturned() throws WaybackException {
-                Timestamp expectTimestamp = new Timestamp("20020120");
-                String expectTimestampValue = expectTimestamp.getOriginalValue();
-                String targetUrl = "http://example.com";
-                String expectedUrl = "http://web.archive.org/web/20020120/http://example.com";
-                String expectedEndPoint =  "http://archive.org/wayback/available?url=" + targetUrl + "&timestamp=0";
-                WaybackResponse waybackResponse = new WaybackResponse();
-                ArchivedSnapshots archivedSnapshots = new ArchivedSnapshots();
-                Closest closest = new Closest();
-                closest.setAvailable(true);
-                closest.setTimestamp(expectTimestampValue);
-                closest.setUrl(expectedUrl);
-                archivedSnapshots.setClosest(closest);
-                waybackResponse.setArchivedSnapshots(archivedSnapshots);
+        // Act
+        List<ResponseSnapshot> result = waybackMachineClientSpy.getSnapshotsInRange(url, beginTimestamp, Optional.of(endTimestamp));
 
-                when(restTemplate.getForEntity(expectedEndPoint, WaybackResponse.class)).thenReturn(new ResponseEntity(waybackResponse, HttpStatus.OK));
-
-                WaybackMachineClient waybackMachineClient = new WaybackMachineClient(restTemplate);
-                ResponseSnapshot responseSnapshot = waybackMachineClient.getFirstSnapshot(targetUrl);
-
-                assertEquals(responseSnapshot.getTimestamp(),expectTimestamp);
-                assertEquals(responseSnapshot.getUrl(),expectedUrl);
-        }
+        // Assert
+        assertEquals(expectedSize, result.size());
+    }
 
 
-        /*
-         @SuppressWarnings("unchecked")
-        @Test
-        void getSnapshotByYear_WaybackResponseContainsValidSnapshot_ValidResponseSnapshotReturned() throws WaybackException {
-                Timestamp expectTimestamp = new Timestamp("19700101");
-                String expectTimestampValue = expectTimestamp.getOriginalValue();
-                String expectedUrl = "http://example.com";
-                String targetUrl = "http://example.com";
+    @Test
+    void getSnapshotsInRange_ThrowsWaybackException_WhenNoSnapshotsFound() {
+        // Arrange
+        String url = "https://example.com";
+        WaybackMachineClient waybackMachineClientSpy = spy(waybackMachineClient);
+        doReturn(Optional.empty()).when(snapshotFetcherSpy).getTimeMap(anyString());
 
-                WaybackResponse waybackResponse = new WaybackResponse();
-                ArchivedSnapshots archivedSnapshots = new ArchivedSnapshots();
-                Closest closest = new Closest();
-                closest.setAvailable(true);
-                closest.setTimestamp(expectTimestampValue);
-                closest.setUrl(expectedUrl);
-                archivedSnapshots.setClosest(closest);
-                waybackResponse.setArchivedSnapshots(archivedSnapshots);
-                String expectedEndPoint =  "http://archive.org/wayback/available?url=" + expectedUrl + "&timestamp=" + expectTimestampValue;
-                when(restTemplate.getForEntity(expectedEndPoint, WaybackResponse.class)).thenReturn(new ResponseEntity(waybackResponse, HttpStatus.OK));
+        // Act and Assert
+        assertThrows(WaybackException.class, () -> waybackMachineClientSpy.getSnapshotsInRange(url, "20220101", Optional.of("20220401")));
+    }
+    @ParameterizedTest
+    @CsvSource({
+            "19700101, 19720101",
+    })
+    void getSnapshotsInRange_ThrowsWaybackException_WhenFilteredSnapshotsEmpty(String beginTimestamp, String endTimestamp) throws WaybackException {
+        // Arrange
+        String url = "https://example.com";
+        WaybackMachineClient waybackMachineClientSpy = spy(waybackMachineClient);
+        doReturn(Optional.of(createSampleResponseSnapshots())).when(snapshotFetcherSpy).getTimeMap(anyString());
+        // Act and Assert
+        WaybackException exception = assertThrows(WaybackException.class, () -> waybackMachineClientSpy.getSnapshotsInRange(url, beginTimestamp, Optional.of(endTimestamp)));
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertTrue(exception.getMessage().contains("No snapshots found for the URL within the specified time range: " + url));
+    }
 
-                WaybackMachineClient waybackMachineClient = new WaybackMachineClient(restTemplate);
-                //List<ResponseSnapshot> responseSnapshots = waybackMachineClient.getSnapshotsByYear(targetUrl,2022);
 
+    // Helper methods
+    private ArrayList<ArrayList<String>> createSampleResponseBody() {
+        ArrayList<ArrayList<String>> body = new ArrayList<>();
+        ArrayList<String> keys = new ArrayList<>(Arrays.asList("timestamp", "original", "statuscode"));
+        ArrayList<String> snapshot1 = new ArrayList<>(Arrays.asList("20220115", "https://example.com", "200"));
+        ArrayList<String> snapshot2 = new ArrayList<>(Arrays.asList("20220315", "https://example.com", "200"));
+        body.add(keys);
+        body.add(snapshot1);
+        body.add(snapshot2);
+        return body;
+    }
 
-
-        }
-        */
-        @SuppressWarnings("unchecked")
-        @Test
-        void getSnapshot_WaybackResponseContainsValidSnapshot_ValidResponseSnapshotReturned() throws WaybackException {
-                Timestamp expectTimestamp = new Timestamp("19700101");
-                String expectTimestampValue = expectTimestamp.getOriginalValue();
-                String expectedUrl = "http://example.com";
-
-                WaybackResponse waybackResponse = new WaybackResponse();
-                ArchivedSnapshots archivedSnapshots = new ArchivedSnapshots();
-                Closest closest = new Closest();
-                closest.setAvailable(true);
-                closest.setTimestamp(expectTimestampValue);
-                closest.setUrl(expectedUrl);
-                archivedSnapshots.setClosest(closest);
-                waybackResponse.setArchivedSnapshots(archivedSnapshots);
-                String expectedEndPoint =  "http://archive.org/wayback/available?url=" + expectedUrl + "&timestamp=" + expectTimestampValue;
-                when(restTemplate.getForEntity(expectedEndPoint, WaybackResponse.class)).thenReturn(new ResponseEntity(waybackResponse, HttpStatus.OK));
-
-                WaybackMachineClient waybackMachineClient = new WaybackMachineClient(restTemplate);
-                ResponseSnapshot responseSnapshot = waybackMachineClient.getSnapshot(expectedUrl,expectTimestampValue);
-
-                assertEquals(responseSnapshot.getTimestamp(),expectTimestamp);
-                assertEquals(responseSnapshot.getUrl(),expectedUrl);
-
-        }
-
-        @Test
-        void testGetSnapshot() {
-        }
-
-        @Test
-        void requestSnapshot() {
-        }
-
-        @Test
-        void requestCalendarCaptures() {
-        }
-
-        @Test
-        void getResponseSnapshot() {
-        }
+    private List<ResponseSnapshot> createSampleResponseSnapshots() {
+        List<ResponseSnapshot> responseSnapshots = new ArrayList<>();
+        responseSnapshots.add(new ResponseSnapshot("https://web.archive.org/web/20220115/https://example.com", "20220115000000", "200"));
+        responseSnapshots.add(new ResponseSnapshot("https://web.archive.org/web/20220315/https://example.com", "20220315000000", "200"));
+        return responseSnapshots;
+    }
 }
