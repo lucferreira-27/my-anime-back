@@ -1,31 +1,34 @@
 package com.lucferreira.myanimeback.service.scraper;
 
 import com.lucferreira.myanimeback.exception.*;
-import com.lucferreira.myanimeback.model.MediaState;
+import com.lucferreira.myanimeback.model.Record;
 import com.lucferreira.myanimeback.util.Regex;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
+import javax.print.Doc;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class MyAnimeListScraper implements ArchiveScraper {
 
-    public MediaState scrape(String url) throws ArchiveScraperException {
-        Document doc = connectToUrl(url);
-        Elements elements = queryElements(doc, TargetStatistics.TEXT.getSelectors());
+    public Record scrape(String url) throws ArchiveScraperException {
+        Connection.Response response = connectToUrl(url);
+        String documentUrl = response.url().toString();;
+        Document doc = jsoupParse(response);
+        Elements elements = queryElements(doc, null,TargetStatistics.TEXT.getSelectors());
         Map<TargetStatistics, String> parseTextMap = getParseTexts(elements, doc);
 
-        return new MediaState.Builder()
-                .archiveUrl(url)
+        return new Record.Builder()
+                .archiveUrl(documentUrl)
                 .members(getIntValue(TargetStatistics.MEMBERS, parseTextMap))
                 .scoreValue(getDoubleValue(TargetStatistics.SCORE_VALUE, parseTextMap))
                 .totalVotes(getIntValue(TargetStatistics.SCORE_VOTES, parseTextMap))
@@ -45,7 +48,7 @@ public class MyAnimeListScraper implements ArchiveScraper {
 
     private <T extends Number> T getNumericalValue(TargetStatistics target, Map<TargetStatistics, String> parseTextMap, NumberParser<T> parser) throws ScrapeParseError {
         String result = parseTextMap.get(target);
-        if (result == null) {
+        if (result == null || result.isEmpty()) {
             return null;
         }
         try {
@@ -71,18 +74,40 @@ public class MyAnimeListScraper implements ArchiveScraper {
         return parseTextMap;
     }
 
-    private Document connectToUrl(String url) throws ScrapeConnectionError {
+    private Connection.Response connectToUrl(String url) throws ScrapeConnectionError {
         try {
-            return Jsoup.connect(url).get();
+            Connection.Response response = Jsoup.connect(url).followRedirects(true).execute();
+            return response;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new ScrapeConnectionError("Error scraping data from URL: " + url + ". The connection failed. Please check the url and try again later.");
+        }
+    }
+    private Document jsoupParse(Connection.Response response) throws ScrapeConnectionError {
+        String url = response.url().toString();
+        try {
+            return response.parse();
         } catch (IOException e) {
             e.printStackTrace();
             throw new ScrapeConnectionError("Error scraping data from URL: " + url + ". The connection failed. Please check the url and try again later.");
         }
     }
 
-    private Elements queryElements(Document doc, List<String> selectors) throws SelectorQueryException {
+
+    private Elements queryElements(Document doc, Element parentElement, List<DocSelector> docSelectors) throws SelectorQueryException {
+
+        for (DocSelector docSelector : docSelectors) {
+            String selector = docSelector.getSelector();
+            Elements element = docSelector.isParentSelector() ? parentElement.select(selector) : doc.select(selector);
+            if (!element.isEmpty()) {
+                return element;
+            }
+        }
+        throw new SelectorQueryException("No elements found for the given selectors.");
+    }
+    private Elements queryElements(Elements parentElement, List<String> selectors) throws SelectorQueryException {
         for (String selector : selectors) {
-            Elements element = doc.select(selector);
+            Elements element = parentElement.select(selector);
             if (!element.isEmpty()) {
                 return element;
             }
@@ -90,13 +115,13 @@ public class MyAnimeListScraper implements ArchiveScraper {
         throw new SelectorQueryException("No elements found for the given selectors.");
     }
     private List<TargetStatistics> findTargetTypes(Element el, List<TargetStatistics> targetTypes) {
-        String elText = el.ownText().replace(TargetStatistics.TEXT.getPattern(), "").toLowerCase();
+        String elText = el.ownText().replaceAll(TargetStatistics.TEXT.getPattern(), "").toLowerCase();
         return targetTypes.stream().filter(targetType -> targetType.getType().equals(elText)).collect(Collectors.toList());
     }
 
     private String extractData(Document doc, TargetStatistics target, Element parentElement) throws SelectorQueryException {
         if (target.getSelectors() != null) {
-            Element element = queryElements(doc, target.getSelectors()).first();
+            Element element = queryElements(doc, parentElement,target.getSelectors()).first();
             return extractText(target, element);
         }
         return extractText(target, parentElement);

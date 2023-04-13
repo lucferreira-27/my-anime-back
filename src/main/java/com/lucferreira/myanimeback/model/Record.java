@@ -1,6 +1,6 @@
 package com.lucferreira.myanimeback.model;
 
-public class MediaState {
+public class Record {
     private Double scoreValue;
     private Integer totalVotes;
     private Integer popularity;
@@ -65,7 +65,7 @@ public class MediaState {
         this.archiveUrl = archiveUrl;
     }
 
-    private MediaState(Double scoreValue, Integer totalVotes, Integer popularity, Integer ranked ,Integer members, Integer favorites, String archiveUrl) {
+    private Record(Double scoreValue, Integer totalVotes, Integer popularity, Integer ranked , Integer members, Integer favorites, String archiveUrl) {
         this.scoreValue = scoreValue;
         this.totalVotes = totalVotes;
         this.popularity = popularity;
@@ -117,8 +117,8 @@ public class MediaState {
             return this;
         }
 
-        public MediaState build() {
-            return new MediaState(scoreValue, totalVotes, popularity, ranked,members, favorites, archiveUrl);
+        public Record build() {
+            return new Record(scoreValue, totalVotes, popularity, ranked,members, favorites, archiveUrl);
         }
     }
 }

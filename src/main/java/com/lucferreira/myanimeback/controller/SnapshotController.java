@@ -25,8 +25,8 @@ public class SnapshotController {
     private WaybackService waybackService;
     @Autowired
     private ScrapeService scrapeService;
-    @GetMapping("/search")
-    public ResponseEntity<List<ResponseSnapshot>> searchByUrl(@RequestParam(value = "url", required = true) String url, Optional<String> timestamp) throws WaybackException {
+    @GetMapping("")
+    public ResponseEntity<List<ResponseSnapshot>> getSnapshot(@RequestParam(value = "url", required = true) String url, Optional<String> timestamp) throws WaybackException {
         if(timestamp.isPresent()){
             String strTimestamp = timestamp.get();
             List<ResponseSnapshot> responseSnapshots = waybackService.getSnapshotByTimestamp(url, strTimestamp);
