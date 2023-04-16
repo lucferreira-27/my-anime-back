@@ -2,6 +2,7 @@ package com.lucferreira.myanimeback.service.scraper;
 
 import com.lucferreira.myanimeback.exception.*;
 import com.lucferreira.myanimeback.model.Record;
+import com.lucferreira.myanimeback.util.ParseNumber;
 import com.lucferreira.myanimeback.util.Regex;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -29,34 +30,15 @@ public class MyAnimeListScraper implements ArchiveScraper {
 
         return new Record.Builder()
                 .archiveUrl(documentUrl)
-                .members(getIntValue(TargetStatistics.MEMBERS, parseTextMap))
-                .scoreValue(getDoubleValue(TargetStatistics.SCORE_VALUE, parseTextMap))
-                .totalVotes(getIntValue(TargetStatistics.SCORE_VOTES, parseTextMap))
-                .favorites(getIntValue(TargetStatistics.FAVORITES, parseTextMap))
-                .popularity(getIntValue(TargetStatistics.POPULARITY, parseTextMap))
-                .ranked(getIntValue(TargetStatistics.RANKED, parseTextMap))
+                .members(ParseNumber.getIntValue(TargetStatistics.MEMBERS, parseTextMap))
+                .scoreValue(ParseNumber.getDoubleValue(TargetStatistics.SCORE_VALUE, parseTextMap))
+                .totalVotes(ParseNumber.getIntValue(TargetStatistics.SCORE_VOTES, parseTextMap))
+                .favorites(ParseNumber.getIntValue(TargetStatistics.FAVORITES, parseTextMap))
+                .popularity(ParseNumber.getIntValue(TargetStatistics.POPULARITY, parseTextMap))
+                .ranked(ParseNumber.getIntValue(TargetStatistics.RANKED, parseTextMap))
                 .build();
     }
 
-    private Integer getIntValue(TargetStatistics target, Map<TargetStatistics, String> parseTextMap) throws ScrapeParseError {
-        return getNumericalValue(target, parseTextMap, Integer::valueOf);
-    }
-
-    private Double getDoubleValue(TargetStatistics target, Map<TargetStatistics, String> parseTextMap) throws ScrapeParseError {
-        return getNumericalValue(target, parseTextMap, Double::valueOf);
-    }
-
-    private <T extends Number> T getNumericalValue(TargetStatistics target, Map<TargetStatistics, String> parseTextMap, NumberParser<T> parser) throws ScrapeParseError {
-        String result = parseTextMap.get(target);
-        if (result == null || result.isEmpty()) {
-            return null;
-        }
-        try {
-            return parser.parse(result);
-        } catch (NumberFormatException e) {
-            throw new ScrapeParseError("Error parsing the data for target " + target.name() + ": " + result + " is not a valid number.");
-        }
-    }
 
     private Map<TargetStatistics, String> getParseTexts(Elements elements, Document doc) throws SelectorQueryException {
         Map<TargetStatistics, String> parseTextMap = new HashMap<>();
@@ -134,8 +116,4 @@ public class MyAnimeListScraper implements ArchiveScraper {
         return Regex.matchAll(element.ownText(), target.getPattern());
     }
 
-    @FunctionalInterface
-    private interface NumberParser<T extends Number> {
-        T parse(String s) throws NumberFormatException;
-    }
 }
