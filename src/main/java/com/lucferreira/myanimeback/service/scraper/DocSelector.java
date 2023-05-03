@@ -5,11 +5,11 @@ public class DocSelector {
     private boolean parentSelector = false;
 
 
-    DocSelector(String selector,boolean parentSelector){
+    public DocSelector(String selector,boolean parentSelector){
         this.selector = selector;
         this.parentSelector =parentSelector;
     }
-    DocSelector(String selector){
+    public DocSelector(String selector){
         this.selector = selector;
     }
     public String getSelector() {

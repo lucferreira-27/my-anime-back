@@ -1,20 +1,22 @@
 package com.lucferreira.myanimeback.util;
 
 import com.lucferreira.myanimeback.exception.ScrapeParseError;
-import com.lucferreira.myanimeback.service.scraper.TargetStatistics;
+import com.lucferreira.myanimeback.service.scraper.mal.MediaAnchors;
 
 import java.util.Map;
 
-public class ParseNumber {
-    public static  Integer getIntValue(TargetStatistics target, Map<TargetStatistics, String> parseTextMap) throws ScrapeParseError {
+public class ParseNumber<T> {
+
+
+    public static  Integer getIntValue(MediaAnchors target, Map<MediaAnchors, String> parseTextMap) throws ScrapeParseError {
         return getNumericalValue(target, parseTextMap, Integer::valueOf);
     }
 
-    public static  Double getDoubleValue(TargetStatistics target, Map<TargetStatistics, String> parseTextMap) throws ScrapeParseError {
+    public static  Double getDoubleValue(MediaAnchors target, Map<MediaAnchors, String> parseTextMap) throws ScrapeParseError {
         return getNumericalValue(target, parseTextMap, Double::valueOf);
     }
 
-    public static  <T extends Number> T getNumericalValue(TargetStatistics target, Map<TargetStatistics, String> parseTextMap, NumberParser<T> parser) throws ScrapeParseError {
+    public static  <T extends Number> T getNumericalValue(MediaAnchors target, Map<MediaAnchors, String> parseTextMap, NumberParser<T> parser) throws ScrapeParseError {
         String result = parseTextMap.get(target);
         if (result == null || result.isEmpty()) {
             return null;

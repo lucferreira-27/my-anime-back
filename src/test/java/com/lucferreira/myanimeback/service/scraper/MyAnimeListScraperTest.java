@@ -3,22 +3,24 @@ package com.lucferreira.myanimeback.service.scraper;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.lucferreira.myanimeback.exception.ArchiveScraperException;
-import com.lucferreira.myanimeback.exception.ScrapeParseError;
 import com.lucferreira.myanimeback.model.Record;
+import com.lucferreira.myanimeback.service.scraper.mal.MediaScrape;
+import com.lucferreira.myanimeback.service.scraper.mal.MyAnimeListScraper;
+import com.lucferreira.myanimeback.service.scraper.mal.TopScrape;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class MyAnimeListScraperTest {
 
-    private final MyAnimeListScraper scraper = new MyAnimeListScraper();
+    private ScrapeHelper scrapeHelper = new ScrapeHelper();
+    private MediaScrape mediaScrape = new MediaScrape(scrapeHelper);
+    private TopScrape topScrape = new TopScrape(scrapeHelper);
+
+    private final MyAnimeListScraper scraper = new MyAnimeListScraper(mediaScrape, topScrape);
 
     @Test
-    void scrape_ReturnsRecord_WhenValidUrlProvided() throws ArchiveScraperException {
+    void mediaScrape_ReturnsRecord_WhenValidUrlProvided() throws ArchiveScraperException {
         String url = "https://myanimelist.net/anime/5114/Fullmetal_Alchemist__Brotherhood";
-        Record record = scraper.scrape(url);
+        Record record = scraper.mediaScrape(url);
         assertNotNull(record);
         assertEquals(url, record.getArchiveUrl());
         assertNotNull(record.getMembers());
@@ -30,9 +32,9 @@ class MyAnimeListScraperTest {
     }
 
     @Test
-    void scrape_ThrowsArchiveScraperException_WhenInvalidUrlProvided() {
+    void mediaScrape_ThrowsArchiveScraperException_WhenInvalidUrlProvided() {
         String url = "https://myanimelist.net/anime/invalid_url";
-        assertThrows(ArchiveScraperException.class, () -> scraper.scrape(url));
+        assertThrows(ArchiveScraperException.class, () -> scraper.mediaScrape(url));
     }
 
 

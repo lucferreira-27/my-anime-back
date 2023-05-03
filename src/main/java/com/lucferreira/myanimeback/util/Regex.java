@@ -37,5 +37,12 @@ public class Regex {
         }
         return matchGroups;
     }
-
+    public static Optional<Matcher> groupsName(String value, String pattern){
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(value);
+        if (m.matches()) {
+            return Optional.of(m);
+        }
+        return Optional.empty();
+    }
 }
