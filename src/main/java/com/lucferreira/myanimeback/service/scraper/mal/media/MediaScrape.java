@@ -1,7 +1,9 @@
 package com.lucferreira.myanimeback.service.scraper.mal;
 
 import com.lucferreira.myanimeback.exception.ArchiveScraperException;
+import com.lucferreira.myanimeback.exception.SelectorQueryException;
 import com.lucferreira.myanimeback.model.Record;
+import com.lucferreira.myanimeback.service.scraper.DocElement;
 import com.lucferreira.myanimeback.service.scraper.PageScraper;
 import com.lucferreira.myanimeback.service.scraper.ScrapeHelper;
 import com.lucferreira.myanimeback.util.ParseNumber;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class MediaScrape extends PageScraper<Record> {
@@ -25,7 +28,10 @@ public class MediaScrape extends PageScraper<Record> {
         Connection.Response response = scrapeHelper.connectToUrl(url);
         String documentUrl = response.url().toString();;
         Document doc = scrapeHelper.jsoupParse(response);
-        Elements elements = scrapeHelper.queryElements(doc, null, MediaAnchors.MEDIA_INIT.getSelectors());
+        Optional<DocElement> optional = scrapeHelper.queryElements(doc, null, TopListAnchors.TOP_LIST_INIT.getSelectors());
+        optional.orElseThrow(() -> new SelectorQueryException("No elements found for the given selectors."));
+        DocElement docElement = optional.get();
+        Elements elements = docElement.getElements();
         Map<MediaAnchors, String> parseTextMap = getParseTexts(elements, doc);
 
         return new Record.Builder()
