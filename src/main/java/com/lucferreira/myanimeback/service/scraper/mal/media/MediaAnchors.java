@@ -1,4 +1,4 @@
-package com.lucferreira.myanimeback.service.scraper.mal;
+package com.lucferreira.myanimeback.service.scraper.mal.media;
 
 import com.lucferreira.myanimeback.service.scraper.DocSelector;
 import com.lucferreira.myanimeback.service.scraper.TextSelector;

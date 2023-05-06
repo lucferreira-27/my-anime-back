@@ -4,16 +4,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.lucferreira.myanimeback.exception.ArchiveScraperException;
 import com.lucferreira.myanimeback.model.Record;
-import com.lucferreira.myanimeback.service.scraper.mal.MediaScrape;
+import com.lucferreira.myanimeback.service.scraper.mal.media.MediaScrape;
 import com.lucferreira.myanimeback.service.scraper.mal.MyAnimeListScraper;
-import com.lucferreira.myanimeback.service.scraper.mal.TopScrape;
+import com.lucferreira.myanimeback.service.scraper.mal.top.TopScrape;
 import org.junit.jupiter.api.Test;
 
 class MyAnimeListScraperTest {
 
     private ScrapeHelper scrapeHelper = new ScrapeHelper();
     private MediaScrape mediaScrape = new MediaScrape(scrapeHelper);
-    private TopScrape topScrape = new TopScrape(scrapeHelper);
+    private TopScrape topScrape = new TopScrape(scrapeHelper,  null, null);
 
     private final MyAnimeListScraper scraper = new MyAnimeListScraper(mediaScrape, topScrape);
 

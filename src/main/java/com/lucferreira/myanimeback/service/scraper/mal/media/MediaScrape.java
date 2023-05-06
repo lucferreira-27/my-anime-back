@@ -1,4 +1,4 @@
-package com.lucferreira.myanimeback.service.scraper.mal;
+package com.lucferreira.myanimeback.service.scraper.mal.media;
 
 import com.lucferreira.myanimeback.exception.ArchiveScraperException;
 import com.lucferreira.myanimeback.exception.SelectorQueryException;
@@ -6,6 +6,7 @@ import com.lucferreira.myanimeback.model.Record;
 import com.lucferreira.myanimeback.service.scraper.DocElement;
 import com.lucferreira.myanimeback.service.scraper.PageScraper;
 import com.lucferreira.myanimeback.service.scraper.ScrapeHelper;
+import com.lucferreira.myanimeback.service.scraper.mal.top.TopListAnchors;
 import com.lucferreira.myanimeback.util.ParseNumber;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
@@ -31,7 +32,7 @@ public class MediaScrape extends PageScraper<Record> {
         Optional<DocElement> optional = scrapeHelper.queryElements(doc, null, TopListAnchors.TOP_LIST_INIT.getSelectors());
         optional.orElseThrow(() -> new SelectorQueryException("No elements found for the given selectors."));
         DocElement docElement = optional.get();
-        Elements elements = docElement.getElements();
+        Elements elements = docElement.elements();
         Map<MediaAnchors, String> parseTextMap = getParseTexts(elements, doc);
 
         return new Record.Builder()

@@ -39,7 +39,7 @@ public class AnchorHandler {
             }
 
             DocElement docElement = optional.get();
-            Elements selectElements = docElement.getElements();
+            Elements selectElements = docElement.elements();
             if (selectElements == null) {
                 continue;
             }
@@ -54,7 +54,7 @@ public class AnchorHandler {
     }
 
     private String handleAnchor(TopListAnchors anchor, DocElement docElement, Document doc) {
-        final Elements selectElements = docElement.getElements();
+        final Elements selectElements = docElement.elements();
         if (anchor == TopListAnchors.TOP_LIST_URL) {
             return extractUrl(selectElements, doc);
         } else {
@@ -72,11 +72,11 @@ public class AnchorHandler {
     }
 
     private String extractResult(TopListAnchors anchor, String text, DocElement docElement) {
-        if (anchor.getSelectors() == null || docElement.getDocSelector().getPattern() == null) {
+        if (anchor.getSelectors() == null || docElement.docSelector().getPattern() == null) {
             return text;
         }
 
-        Map<Integer, String> results = Regex.groups(text, docElement.getDocSelector().getPattern());
+        Map<Integer, String> results = Regex.groups(text, docElement.docSelector().getPattern());
         if(results.isEmpty()){
             return null;
         }

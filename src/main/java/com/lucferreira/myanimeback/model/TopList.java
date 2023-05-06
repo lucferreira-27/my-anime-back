@@ -1,19 +1,18 @@
 package com.lucferreira.myanimeback.model;
 
-import com.lucferreira.myanimeback.service.wayback.Timestamp;
-
 import java.util.*;
 
 public class TopList {
     private final List<TopListItem> recordList = new ArrayList<>();
     private TopType topType;
     private TopSubtype topSubtype;
-    private Timestamp timestamp;
 
-    public TopList(TopType topType, TopSubtype topSubtype, Timestamp timestamp){
+    private String archiveUrl;
+
+    public TopList(TopType topType, TopSubtype topSubtype, String archiveUrl){
         this.topType = topType;
         this.topSubtype = topSubtype;
-        this.timestamp = timestamp;
+        this.archiveUrl = archiveUrl;
     }
 
     public void addTopListItemToMap(TopListItem record){
@@ -49,23 +48,34 @@ public class TopList {
     }
 
     public enum TopSubtype {
-        ALL,
-        AIRING,
-        UPCOMING,
-        TV,
-        MOVIE,
-        OVA,
-        ONA,
-        SPECIAL,
-        POPULAR,
-        FAVORITE,
-        MANGA,
-        ONESHOTS,
-        DOUJINSHI,
-        LIGHT_NOVELS,
-        NOVELS,
-        MANHWA,
-        MANHUA,
+        ALL(),
+        AIRING("airing"),
+        UPCOMING("upcoming"),
+        TV("tv"),
+        MOVIE("movie"),
+        OVA("ova"),
+        ONA("ona"),
+        SPECIAL("special"),
+        POPULAR("bypopularity"),
+        FAVORITE("favorite"),
+        MANGA("manga"),
+        ONE_SHOTS("oneshots"),
+        DOUJINSHI("doujin"),
+        LIGHT_NOVELS("lightnovels"),
+        NOVELS("novels"),
+        MANHWA("manhwa"),
+        MANHUA("manhua");
+
+        private final List<String> possiblesName;
+
+
+        TopSubtype(String... possiblesName) {
+            this.possiblesName = Arrays.asList(possiblesName);
+        }
+
+        public List<String> getPossiblesName() {
+            return possiblesName;
+        }
     }
 }
 

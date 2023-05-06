@@ -2,7 +2,7 @@ package com.lucferreira.myanimeback.service.scraper;
 
 import com.lucferreira.myanimeback.exception.ArchiveScraperException;
 import com.lucferreira.myanimeback.exception.SelectorQueryException;
-import com.lucferreira.myanimeback.service.scraper.mal.MediaAnchors;
+import com.lucferreira.myanimeback.service.scraper.mal.media.MediaAnchors;
 import com.lucferreira.myanimeback.util.Regex;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public abstract class PageScraper<T> {
@@ -50,7 +51,10 @@ public abstract class PageScraper<T> {
 
     protected String extractData(Document doc, MediaAnchors target, Element parentElement) throws SelectorQueryException {
         if (target.getSelectors() != null) {
-            Element element = scrapeHelper.queryElements(doc, parentElement,target.getSelectors()).first();
+            Optional<DocElement> optional = scrapeHelper.queryElements(doc, parentElement,target.getSelectors());
+            optional.orElseThrow(() -> new SelectorQueryException("No elements found for the given selectors."));
+            DocElement docElement = optional.get();
+            Element element = docElement.elements().first();
             return extractText(target, element);
         }
         return extractText(target, parentElement);

@@ -37,7 +37,7 @@ public class TopScrape extends PageScraper<TopList> {
         Optional<DocElement> optional = scrapeHelper.queryElements(doc, null, TopListAnchors.TOP_LIST_INIT.getSelectors());
         optional.orElseThrow(() -> new SelectorQueryException("No elements found for the given selectors."));
         DocElement docElement = optional.get();
-        Elements elements = docElement.getElements();
+        Elements elements = docElement.elements();
 
         TopList topList = processElements(elements, doc);
 

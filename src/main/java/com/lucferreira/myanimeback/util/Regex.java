@@ -26,13 +26,13 @@ public class Regex {
         }
         return results.stream().collect(Collectors.joining());
     }
-    public static Map<String,String> groups(String value, String pattern){
+    public static Map<Integer,String> groups(String value, String pattern){
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(value);
-        Map<String,String> matchGroups = new HashMap<>();
+        Map<Integer,String> matchGroups = new HashMap<>();
         if (m.find()){
             for (int i = 0; i <= m.groupCount(); i++) {
-                matchGroups.put(Integer.toString(i), m.group(i));
+                matchGroups.put(i, m.group(i));
             }
         }
         return matchGroups;

@@ -4,6 +4,8 @@ import com.lucferreira.myanimeback.exception.*;
 import com.lucferreira.myanimeback.model.Record;
 import com.lucferreira.myanimeback.model.TopList;
 import com.lucferreira.myanimeback.service.scraper.ArchiveScraper;
+import com.lucferreira.myanimeback.service.scraper.mal.media.MediaScrape;
+import com.lucferreira.myanimeback.service.scraper.mal.top.TopScrape;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

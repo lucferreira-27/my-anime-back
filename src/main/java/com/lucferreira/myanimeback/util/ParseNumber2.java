@@ -1,7 +1,6 @@
 package com.lucferreira.myanimeback.util;
 
 import com.lucferreira.myanimeback.exception.ScrapeParseError;
-import com.lucferreira.myanimeback.service.scraper.mal.MediaAnchors;
 
 import java.util.Map;
 
@@ -13,12 +12,23 @@ public class ParseNumber2<E> {
             if(value.contains(",")){
                 value = value.replaceAll(",","");
             }
+            final String trimValue = value.trim();
+            if(trimValue.contains("?") || trimValue.contains("-")){
+                return -1;
+            }
             return Integer.valueOf(value);
         });
     }
 
     public static <E>  Double getDoubleValue(E target, Map<E, String> parseTextMap) throws ScrapeParseError {
-        return getNumericalValue(target, parseTextMap, Double::valueOf);
+        return getNumericalValue(target, parseTextMap, (value) ->{
+            final String trimValue = value.toLowerCase().replaceAll("\\s", "");;
+            if(trimValue.contains("?") || trimValue.contains("-")){
+                return -1D;
+            }
+
+            return Double.valueOf(trimValue);
+        });
     }
 
 

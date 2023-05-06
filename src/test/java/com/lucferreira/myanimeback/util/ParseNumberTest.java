@@ -1,7 +1,7 @@
 package com.lucferreira.myanimeback.util;
 
 import com.lucferreira.myanimeback.exception.ScrapeParseError;
-import com.lucferreira.myanimeback.service.scraper.mal.MediaAnchors;
+import com.lucferreira.myanimeback.service.scraper.mal.media.MediaAnchors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
