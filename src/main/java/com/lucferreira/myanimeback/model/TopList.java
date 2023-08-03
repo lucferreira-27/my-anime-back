@@ -42,6 +42,10 @@ public class TopList {
         return topSubtype;
     }
 
+    public String getArchiveUrl() {
+        return archiveUrl;
+    }
+
     public enum TopType {
         ANIME,
         MANGA

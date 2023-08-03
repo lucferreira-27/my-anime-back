@@ -31,7 +31,7 @@ public class RecordService {
 
     public TopList getTopListRecord(String url){
 
-        final String pattern = "https:\\/\\/web\\.archive\\.org\\/web\\/(?<date>\\d{14})\\/(https?:\\/\\/)?myanimelist\\.net\\/(?<category>topanime.php|topmanga.php)";
+        final String pattern = "https:\\/\\/web\\.archive\\.org\\/web\\/(?<date>\\d{14})\\/(https?:\\/\\/)?(www\\.)?myanimelist\\.net\\/(?<category>topanime.php|topmanga.php)";
         if(Regex.match(url,pattern) == null){
             final String errorMessage = "Invalid URL. Please provide a valid Archive MyAnimeList URL in the following format: " +
                     "https://web.archive.org/web/{timestamp}*/https://myanimelist.net/{topanime|topmanga}";

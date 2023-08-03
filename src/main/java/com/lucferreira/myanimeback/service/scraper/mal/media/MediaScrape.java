@@ -29,7 +29,7 @@ public class MediaScrape extends PageScraper<Record> {
         Connection.Response response = scrapeHelper.connectToUrl(url);
         String documentUrl = response.url().toString();;
         Document doc = scrapeHelper.jsoupParse(response);
-        Optional<DocElement> optional = scrapeHelper.queryElements(doc, null, TopListAnchors.TOP_LIST_INIT.getSelectors());
+        Optional<DocElement> optional = scrapeHelper.queryElements(doc, null, MediaAnchors.MEDIA_INIT.getSelectors());
         optional.orElseThrow(() -> new SelectorQueryException("No elements found for the given selectors."));
         DocElement docElement = optional.get();
         Elements elements = docElement.elements();

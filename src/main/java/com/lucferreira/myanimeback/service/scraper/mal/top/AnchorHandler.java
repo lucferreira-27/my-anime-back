@@ -3,6 +3,7 @@ package com.lucferreira.myanimeback.service.scraper.mal.top;
 import com.lucferreira.myanimeback.exception.ScrapeParseError;
 import com.lucferreira.myanimeback.exception.SelectorQueryException;
 import com.lucferreira.myanimeback.service.scraper.DocElement;
+import com.lucferreira.myanimeback.service.scraper.DocSelector;
 import com.lucferreira.myanimeback.service.scraper.ScrapeHelper;
 import com.lucferreira.myanimeback.util.Regex;
 import org.jsoup.nodes.Document;
@@ -26,41 +27,88 @@ public class AnchorHandler {
         this.scrapeHelper = scrapeHelper;
     }
 
-    public Map<TopListAnchors, String> extractValuesFromAnchors(Element element, Document doc, List<TopListAnchors> topListAnchors) throws SelectorQueryException, ScrapeParseError {
+    public Map<TopListAnchors, String> extractValuesFromAnchors(Element element, ListElementID listElementID, List<TopListAnchors> topListAnchors) throws SelectorQueryException, ScrapeParseError {
         Map<TopListAnchors, String> valuesMap = new HashMap<>();
         for (TopListAnchors anchor : topListAnchors) {
-            if (anchor == TopListAnchors.TOP_LIST_INIT) {
-                continue;
-            }
-
-            Optional<DocElement> optional = queryAnchorElements(doc, element, anchor);
-            if (optional.isEmpty()) {
-                continue;
-            }
-
-            DocElement docElement = optional.get();
-            Elements selectElements = docElement.elements();
-            if (selectElements == null) {
-                continue;
-            }
-
-            String result = handleAnchor(anchor, docElement, doc);
+            if (anchor == TopListAnchors.TOP_LIST_INIT)  continue;
+            Optional<String> optionalResult = getResult(element, listElementID, anchor);
+            if (optionalResult.isEmpty()) continue;
+            String result = optionalResult.get();
             valuesMap.put(anchor, result);
         }
         return valuesMap;
     }
-    private Optional<DocElement> queryAnchorElements(Document doc, Element element, TopListAnchors anchor) throws SelectorQueryException {
-        return scrapeHelper.queryElements(doc, element, anchor.getSelectors());
-    }
 
-    private String handleAnchor(TopListAnchors anchor, DocElement docElement, Document doc) {
+    private Optional<String> getResult(Element element, ListElementID listElementID, TopListAnchors anchor) throws SelectorQueryException {
+        Document doc = listElementID.doc();
+        Optional<DocElement> optional = queryAnchorElements(listElementID, element, anchor.getSelectors());
+        if (optional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        DocElement docElement = optional.get();
+        int initID = docElement.docSelector().getId();
+        int selectorId = listElementID.selectorId();
+        if(initID != selectorId){
+            return Optional.empty();
+        }
+
+
+
+        Elements selectElements = docElement.elements();
+        if (selectElements == null) {
+            return Optional.empty();
+        }
+
+        Optional<String> optionalResult = handleAnchor(anchor, docElement, listElementID);
+        if(optionalResult.isEmpty()){
+            return Optional.empty();
+        }
+        if(optionalResult.get().isEmpty()){
+            if(docElement.position() < anchor.getSelectors().size()){
+                return getResultNext(element,listElementID,anchor,docElement.position());
+            }
+        }
+        return optionalResult;
+    }
+    private Optional<String> getResultNext(Element element, ListElementID listElementID, TopListAnchors anchor, int fromNext) throws SelectorQueryException {
+        List<DocSelector> splitDocSelectors = anchor.getSelectors().subList(fromNext + 1,anchor.getSelectors().size());
+        Optional<DocElement> optional = queryAnchorElements(listElementID, element, splitDocSelectors);
+        if (optional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        DocElement docElement = optional.get();
+        Elements selectElements = docElement.elements();
+        if (selectElements == null) {
+            return Optional.empty();
+        }
+
+        Optional<String> optionalResult = handleAnchor(anchor, docElement, listElementID);
+        if(optionalResult.get().isEmpty()){
+            if(docElement.position() < anchor.getSelectors().size()){
+                return getResultNext(element,listElementID,anchor,docElement.position());
+            }
+        }
+        return optionalResult;
+    }
+    private Optional<DocElement> queryAnchorElements(ListElementID listElementID, Element element, List<DocSelector> docSelectors) throws SelectorQueryException {
+        return scrapeHelper.queryElements(listElementID, element, docSelectors);
+    }
+    private Optional<DocElement> queryNextAnchorElements(Document doc, Element element, List<DocSelector> docSelectors, int nextFrom) throws SelectorQueryException {
+        List<DocSelector> splitDocSelectors = docSelectors.subList(0,nextFrom);
+        return scrapeHelper.queryElements(doc, element, splitDocSelectors);
+    }
+    private Optional<String> handleAnchor(TopListAnchors anchor, DocElement docElement, ListElementID listElementID) {
+        Document doc = listElementID.doc();
         final Elements selectElements = docElement.elements();
         if (anchor == TopListAnchors.TOP_LIST_URL) {
-            return extractUrl(selectElements, doc);
-        } else {
-            String text = selectElements.text();
-            return extractResult(anchor, text, docElement);
+            return Optional.of(extractUrl(selectElements, doc));
         }
+        String text = selectElements.text();
+        String result = extractResult(anchor, text, docElement);
+        return Optional.ofNullable(result);
+
     }
 
     private String extractUrl(Elements selectElements, Document doc) {

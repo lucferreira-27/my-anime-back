@@ -22,8 +22,8 @@ public class TopListItemFactory {
         this.anchorHandler = anchorHandler;
     }
 
-    public TopListItem processAnchors(Element element, Document doc, List<TopListAnchors> topListAnchors) throws SelectorQueryException, ScrapeParseError {
-        Map<TopListAnchors, String> valuesMap = anchorHandler.extractValuesFromAnchors(element, doc, topListAnchors);
+    public TopListItem processAnchors(Element element, ListElementID listElementID, List<TopListAnchors> topListAnchors) throws SelectorQueryException, ScrapeParseError {
+        Map<TopListAnchors, String> valuesMap = anchorHandler.extractValuesFromAnchors(element, listElementID, topListAnchors);
         return buildTopListItem(valuesMap);
     }
 

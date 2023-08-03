@@ -6,18 +6,22 @@ public class DocSelector {
     private String selector;
     private String pattern;
     private boolean parentSelector = false;
+    private Integer id;
 
 
-    public DocSelector(String selector,boolean parentSelector){
+    public DocSelector(String selector,boolean parentSelector,Integer id){
+        this.id = id;
         this.selector = selector;
         this.parentSelector =parentSelector;
     }
-    public DocSelector(String selector,boolean parentSelector, String  pattern ){
+    public DocSelector(String selector,boolean parentSelector, String  pattern,Integer id ){
+        this.id = id;
         this.selector = selector;
         this.parentSelector =parentSelector;
         this.pattern = pattern;
     }
-    public DocSelector(String selector){
+    public DocSelector(String selector,Integer id){
+        this.id = id;
         this.selector = selector;
     }
     public String getSelector() {
@@ -30,5 +34,9 @@ public class DocSelector {
 
     public String getPattern() {
         return pattern;
+    }
+
+    public Integer getId() {
+        return id;
     }
 }
