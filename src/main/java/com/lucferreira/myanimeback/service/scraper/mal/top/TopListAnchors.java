@@ -30,7 +30,7 @@ public enum TopListAnchors {
     ),
     TOP_LIST_TITLE("title",
             new DocSelector(".anime_ranking_h3 a",true,1),
-            new DocSelector(".title .hoverinfo_trigger",true,2),
+            new DocSelector(".title .detail .hoverinfo_trigger",true,2),
             new DocSelector(".hoverinfo_trigger strong",true,3),
             new DocSelector("td:nth-child(3)",true,4),
             new DocSelector("td:nth-child(2)",true,4),

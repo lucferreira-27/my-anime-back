@@ -60,7 +60,6 @@ public class MediaService {
     }
 
     public MediaDto createMedia(MediaForm mediaForm) {
-        System.out.println(mediaForm.getName());
         Media newMedia = Media.fromForm(mediaForm);
         Media createdMedia = saveMedia(newMedia);
         return Media.toDto(createdMedia);

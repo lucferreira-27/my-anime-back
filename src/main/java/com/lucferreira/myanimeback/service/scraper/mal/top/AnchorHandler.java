@@ -47,13 +47,6 @@ public class AnchorHandler {
         }
 
         DocElement docElement = optional.get();
-        int initID = docElement.docSelector().getId();
-        int selectorId = listElementID.selectorId();
-        if(initID != selectorId){
-            return Optional.empty();
-        }
-
-
 
         Elements selectElements = docElement.elements();
         if (selectElements == null) {
