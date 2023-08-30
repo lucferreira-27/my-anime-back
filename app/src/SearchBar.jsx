@@ -6,14 +6,23 @@ import {
     Box,
     Typography,
     createTheme,
+    CircularProgress,
+
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { styled } from '@mui/system';
-
+import useJikanSearch from './hooks/useJikanSearch'; // Import the custom hook
+import useDebounce from './hooks/useDebounce'; // Import the custom hook
 
 const theme = createTheme({
     palette: {
         primary: {
+            main: '#1976D2',
+            dark: '#115293',
+            light: '#4791DB',
+        },
+        secondary: {
             main: '#1976D2',
             dark: '#115293',
             light: '#4791DB',
@@ -37,6 +46,8 @@ export default function SearchBar() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isValidUrl, setIsValidUrl] = useState(true);
     const [isShowError, setShowError] = useState(false);
+    const { searchData, setSearchData, loading, error, setError, setLoading, performSearch } = useJikanSearch();
+
     const inputRef = useRef(null);
 
     useEffect(() => {
@@ -46,55 +57,91 @@ export default function SearchBar() {
         setShowError(!isUrlValid && searchTerm.length > 0);
     }, [searchTerm]);
 
-    const handleChange = (event) => {
-        setSearchTerm(event.target.value);
-    };
+    useEffect(() => {
+        if (isValidUrl && searchTerm) {
+            handleDebouncedSearch()
+        }
+    }, [isValidUrl])
 
-    const handleSearch = () => {
-        try {
-            new URL(searchTerm);
-            // URL is valid, perform your search logic here
-        } catch (error) {
-            setIsValidUrl(false);
+    const handleChange = (event) => {
+        if(!searchData){
+            setSearchTerm(event.target.value);
         }
     };
 
+    const handleSearch = () => {
+        performSearch(searchTerm);
+    };
+
+    const resetSearch = () => {
+        setSearchTerm('');
+        setSearchData(null);
+        setError(null);
+        setIsValidUrl(true);
+    };
+    const DEBOUNCE_DELAY = 300; // milliseconds
+    const handleDebouncedSearch = useDebounce(handleSearch, DEBOUNCE_DELAY);
 
     return (
         <Container maxWidth="md" sx={{ mt: 10 }}>
             <Box>
                 <SearchTextField
+                    fontColor="green"
                     label="Search"
                     variant="filled"
-                    value={searchTerm}
+                    value={!searchData ? searchTerm : searchData.titles[0].title}
                     onChange={handleChange}
                     inputRef={inputRef}
                     error={isShowError}
                     helperText={isShowError && 'Please enter a valid MyAnimeList URL'}
                     InputProps={{
+                        style: {
+                            color: '#555555'
+                        },
                         endAdornment: (
                             <InputAdornment position="end">
-                                <SearchIcon color="primary"
-                                    disabled={!isValidUrl}
-                                    onClick={handleSearch}
-                                    sx={
-                                        {
-                                            color: isValidUrl ? theme.palette.primary.main : theme.palette.text.secondary,
-                                            cursor: isValidUrl ? 'pointer' : 'not-allowed',
-                                            transition: 'color 0.3s ease-in-out',
-                                            '&:hover': {
-                                                color: isValidUrl ? theme.palette.primary.dark : theme.palette.text.secondary,
-                                            },
-                                            '&:active': {
-                                                color: isValidUrl ? theme.palette.primary.light : theme.palette.text.secondary,
-                                            },
-                                        }
-                                    } />
+
+                                {loading ? (
+                                    <CircularProgress color="primary" size={20} />
+                                ) : searchData ? (
+                                    <HighlightOffIcon
+                                        color="primary"
+                                        onClick={resetSearch}
+                                        sx={{ cursor: 'pointer' }}
+                                    />
+                                ) : (
+                                    <SearchIcon color="primary"
+                                        disabled={!isValidUrl}
+                                        sx={
+                                            {
+                                                color: isValidUrl ? theme.palette.primary.main : theme.palette.text.secondary,
+                                                cursor: 'pointer',
+                                                transition: 'color 0.3s ease-in-out',
+                                                '&:hover': {
+                                                    color: isValidUrl ? theme.palette.primary.dark : theme.palette.text.secondary,
+                                                },
+                                                '&:active': {
+                                                    color: isValidUrl ? theme.palette.primary.light : theme.palette.text.secondary,
+                                                },
+                                            }
+                                        } />
+                                )
+                                }
+
                             </InputAdornment>
                         ),
                         disableUnderline: true,
                     }}
                 />
+                {error && (
+                    <Typography
+                        variant="body2"
+                        color="error"
+                        sx={{ mt: 1, ml: 2 }}
+                    >
+                        {error}
+                    </Typography>
+                )}
                 {!searchTerm && <Typography
                     variant="body2"
                     color="#FFF5"
@@ -110,7 +157,6 @@ export default function SearchBar() {
                 >
                     You can search by directly entering a MyAnimeList URL
                 </Typography>}
-                
             </Box>
         </Container>
     );
