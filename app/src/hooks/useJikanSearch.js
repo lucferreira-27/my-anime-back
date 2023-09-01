@@ -13,7 +13,6 @@ const useJikanSearch = () => {
         setLoading(true);
         setError(null);
         const {data} = await jikanSearch(url);
-        console.log(data)
         setSearchData(data);
       } catch (error) {
         setError(error.message);

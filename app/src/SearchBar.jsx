@@ -42,13 +42,18 @@ const SearchTextField = styled(TextField)({
 
 
 
-export default function SearchBar() {
+export default function SearchBar({result,setResult}) {
     const [searchTerm, setSearchTerm] = useState('');
     const [isValidUrl, setIsValidUrl] = useState(true);
     const [isShowError, setShowError] = useState(false);
     const { searchData, setSearchData, loading, error, setError, setLoading, performSearch } = useJikanSearch();
 
     const inputRef = useRef(null);
+
+    useEffect(() =>{
+        console.log(searchData)
+        setResult(searchData)
+    },[searchData])
 
     useEffect(() => {
         const urlPattern = /^https:\/\/myanimelist\.net\/anime|manga\/\d+(\/.*)?$/;

@@ -3,6 +3,8 @@ import SearchBar from "./SearchBar";
 import { styled } from '@mui/system';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
+import { Container } from '@mui/material';
+import InfoPanel from './InfoPanel';
 
 const StyledAppBar = styled(AppBar)({
   backgroundColor: '#1450A3',
@@ -24,6 +26,9 @@ const AppName = styled('span')({
 });
 
 function App() {
+
+  const [result, setResult] = useState()
+
   return (
     <div>
       <StyledAppBar position="sticky">
@@ -33,7 +38,13 @@ function App() {
           </NavbarTitle>
         </Toolbar>
       </StyledAppBar>
-        <SearchBar />
+      <SearchBar result={result} setResult={setResult} />
+      {
+        result && (
+          <InfoPanel result={result} />
+        )
+      }
+
     </div>
   );
 }

@@ -11,7 +11,6 @@ const getMALId = (url) => {
 }
 
 export const jikanSearch = async (url) => {
-    console.log(BASE_URL)
     const id = getMALId(url);
     if (!id) {
         throw new Error('Invalid URL, ID is missing.');
