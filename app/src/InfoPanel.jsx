@@ -7,14 +7,20 @@ const PanelGrid = styled(Grid)(({ theme }) => ({
     backgroundColor: `#0d1117`,
     borderRadius: `5px`,
     padding: `10px`,
-    marginTop: theme.spacing(3), // Increase margin top
-    maxWidth: "600px",
+    marginTop: theme.spacing(3),
+    maxWidth: '600px',
     [theme.breakpoints.up('md')]: {
-        maxWidth: "80%",
-        marginLeft: "10%",
+        maxWidth: '80%',
+        marginLeft: '10%',
     },
 }));
 
+const AnimeDivider = styled(Divider)(({ theme }) => ({
+    color: `white`,
+    "&::before, &::after": {
+        borderColor: "white",
+    },
+}));
 
 const AnimeImage = styled('img')(({ theme }) => ({
     width: `100%`,
@@ -24,13 +30,9 @@ const AnimeImage = styled('img')(({ theme }) => ({
         maxWidth: `200px`,
     },
     borderRadius: `15px`,
-    borderColor: `red`
+    borderColor: `red`,
 }));
 
-const InfoValue = styled('span')(({ theme }) => ({
-    fontWeight: `bold`,
-    fontSize: `16px`
-}));
 const AnimeCard = styled(Card)(({ theme }) => ({
     color: `#fff`,
     display: 'flex',
@@ -38,25 +40,59 @@ const AnimeCard = styled(Card)(({ theme }) => ({
     flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
-    maxWidth: "550px",
+    maxWidth: '550px',
     [theme.breakpoints.down('sm')]: {
-        maxWidth: "100%", // Adjust width for medium and larger screens
+        maxWidth: '100%',
     },
 }));
 
 const AnimeCardContent = styled(CardContent)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'row',
+    justifyContent: 'space-between',
 }));
 
 const AnimeInfo = styled(Typography)(({ theme }) => ({
     marginTop: 'auto',
+    fontSize: '16px',
 }));
 
-const Title = styled(Typography)(({ theme }) => ({
-    fontSize: '1.5rem',
-    marginBottom: theme.spacing(2), // Add margin below title
+const ScoreContainer = styled(Box)(({ theme }) => ({
+    margin: `auto`,
+    justifyContent: `center`,
+    textAlign: `center`,
 }));
+
+const ScoreLabel = styled(Box)(({ theme }) => ({
+    backgroundColor: `#2e51a2`,
+    fontSize: `10px`,
+    fontWeight: `bold`,
+    padding: `1px 5px 1px 5px`,
+    borderRadius: `2px`,
+    margin: `auto`,
+    maxWidth: `50%`,
+}));
+
+const ScoreValue = styled(AnimeInfo)(({ theme }) => ({
+    fontWeight: `bold`,
+    fontSize: `24px`,
+}));
+
+const ScoreUserCount = styled(AnimeInfo)(({ theme }) => ({
+    fontSize: `12px`,
+}));
+
+
+const InfoValue = styled('span')(({ theme }) => ({
+    fontWeight: `bold`,
+    fontSize: `16px`
+}));
+
+const ExtraAnimeInfo = styled(AnimeInfo)(({ theme }) => ({
+    fontSize: '12px',
+    color: `#AEAEAE`,
+}));
+
 
 function InfoPanel({ result }) {
     const {
@@ -93,40 +129,13 @@ function InfoPanel({ result }) {
                 </Grid>
                 <Grid item xs={12} md={8}>
                     <AnimeCard>
-
                         <AnimeCardContent>
-
-                            <Box sx={{ margin: `auto`, justifyContent: `center`, textAlign: `center` }}>
-                                <AnimeInfo variant="body1">
-                                    <Box sx={
-                                        {
-                                            backgroundColor: `#2e51a2`,
-                                            fontSize: `10px`,
-                                            fontWeight: `bold`,
-                                            padding: `1px 5px 1px 5px`,
-                                            borderRadius: `2px`,
-                                            margin: `auto`,
-                                            maxWidth: `50%`
-                                        }
-                                    }>
-                                        SCORE
-                                    </Box>
-                                </AnimeInfo>
-                                <AnimeInfo variant="body1" sx={{
-                                    fontWeight: `bold`,
-                                    fontSize: `24px`,
-
-                                }}>{score.toFixed(2)}</AnimeInfo>
-                                <AnimeInfo variant="body1" sx={{
-                                    fontSize: `12px`,
-                                }}>{scored_by.toLocaleString()} users</AnimeInfo>
-                            </Box>
-                            <Divider flexItem orientation='vertical' sx={
-                                {
-                                    mx: 2,
-                                    backgroundColor: `gray`
-                                }
-                            } />
+                            <ScoreContainer>
+                                <ScoreLabel>SCORE</ScoreLabel>
+                                <ScoreValue>{score.toFixed(2)}</ScoreValue>
+                                <ScoreUserCount>{scored_by.toLocaleString()} users</ScoreUserCount>
+                            </ScoreContainer>
+                            <Divider flexItem orientation='vertical' sx={{ mx: 2, backgroundColor: `gray` }} />
                             <Box>
                                 <Stack direction="row" spacing={2}>
                                     <AnimeInfo variant="body1">Ranked
@@ -148,29 +157,13 @@ function InfoPanel({ result }) {
                                 <Stack sx={{
                                     mt: `25px`
                                 }} direction="row" spacing={2}>
-                                    <AnimeInfo variant="body1"sx={{
-                                        fontSize: `12px`
-                                    }}>{`${season.replace(/\b\w/g, (match) => match.toUpperCase())} ${year}`}</AnimeInfo>
-                                    <Divider flexItem orientation='vertical' sx={
-                                        {
-                                            backgroundColor: `gray`
-                                        }
-                                    } />
-                                    <AnimeInfo variant="body1"sx={{
-                                        fontSize: `12px`
-                                    }}>{type}</AnimeInfo>
-                                    <Divider flexItem orientation='vertical' sx={
-                                        {
-                                            backgroundColor: `gray`
-                                        }
-                                    } />
-                                    <AnimeInfo variant="body1" sx={{
-                                        fontSize: `12px`
-                                    }}>{studios[0]?.name}</AnimeInfo>
+                                    <ExtraAnimeInfo variant="body1">{`${season.replace(/\b\w/g, (match) => match.toUpperCase())} ${year}`}</ExtraAnimeInfo>
+                                    <Divider flexItem orientation='vertical' sx={{ backgroundColor: `gray` }} />
+                                    <ExtraAnimeInfo variant="body1">{type}</ExtraAnimeInfo>
+                                    <Divider flexItem orientation='vertical' sx={{ backgroundColor: `gray` }} />
+                                    <ExtraAnimeInfo variant="body1">{studios[0]?.name}</ExtraAnimeInfo>
                                 </Stack>
                             </Box>
-
-                            {/* You can add more info here */}
                         </AnimeCardContent>
                     </AnimeCard>
                 </Grid>
