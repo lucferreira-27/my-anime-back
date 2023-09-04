@@ -44,9 +44,7 @@ public class ScrapeHelper {
             DocSelector docSelector = docSelectors.get(i);
             String selector =  docSelector.getSelector();
             Elements element = docSelector.isParentSelector() ? parentElement.select(selector) : doc.select(selector);
-            System.out.println(elementID.selectorId() + " " + selector + " " + docSelector.getId() + "" + (docSelector.getId() == elementID.selectorId()));
             if (!element.isEmpty()) {
-                System.out.println(element.text());
                 return Optional.of(new DocElement(element,docSelector,elementID.selectorId()));
             }
         }
