@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, Typography, Divider, Box, FormControl, InputLabel, Select, MenuItem, Grid, TextField } from '@mui/material';
 import { styled } from '@mui/system';
+import useSplitSnapshots from './hooks/useSplitSnapshots'; // Import the custom hook
 
 const FormContainer = styled('form')`
   display: grid;
@@ -54,7 +55,9 @@ const StyledTextField = styled(TextField)`
   }
 `;
 
-export default function SnapshotForm({ formData, setFormData, handleData, rangeSnapshots }) {
+export default function SnapshotForm({ formData, setFormData, handleData, snapshotData }) {
+    const splitSnapshots = useSplitSnapshots(snapshotData, formData);
+
     return (
         <>
             <FormContainer onSubmit={handleData}>
@@ -129,7 +132,7 @@ export default function SnapshotForm({ formData, setFormData, handleData, rangeS
                                     alignSelf: 'center',
                                 }}
                             >
-                                {`It's projected that ${rangeSnapshots?.length || 3000} snapshots will be part of this timeline.`}
+                                {`It's projected that ${splitSnapshots?.length || 0} snapshots will be part of this timeline of ${snapshotData?.length}.`}
                             </Typography>
                         </Box>
                     </Grid>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LinearProgress, Grid, Card, CardContent, Typography, Container, Box, Divider, Stack, Button, Paper, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { styled } from '@mui/system';
 import useMABSearch from './hooks/useMABSearch'; // Import the custom hook
+
 import SnapshotForm from './SnapshotForm';
 
 const MABCard = styled(`div`)(({ theme }) => ({
@@ -13,17 +14,46 @@ const MABCard = styled(`div`)(({ theme }) => ({
     marginTop: `3vh`
 }));
 
-export default function FormMAB({ url }) {
+
+const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
+// Function to adjust the startDate based on snapshotData
+const adjustStartDate = (snapshotData, airedFrom) => {
+    const startDate = new Date(airedFrom);
+    const snapshotDateMillis = snapshotData[0].timestamp.date;
+
+    if (startDate.getTime() < snapshotDateMillis) {
+        startDate.setTime(snapshotDateMillis);
+    }
+
+    return formatDate(startDate);
+};
+
+export default function FormMAB({ result }) {
     const { snapshotData, loading, error, performSearch } = useMABSearch();
     const [progress, setProgress] = useState(0);
     const [working, setWorking] = useState(false)
     const [next, setNext] = useState(false)
-    const [formData, setFormData] = useState({
-        startDate: '',
-        endDate: '',
-        distanceType: 'days',
-        distance: '',
-    });
+    const { url, aired } = result
+    const [formData, setFormData] = useState();
+
+    useEffect(() => {
+        if (snapshotData) {
+            setFormData({
+                startDate: adjustStartDate(snapshotData, aired.from),
+                endDate: formatDate(new Date()),
+                distanceType: 'months',
+                distance: '6',
+            })
+        }
+
+    }, [snapshotData])
+    // Use the custom hook to get split snapshots based on the config
 
     useEffect(() => {
         let timer;
@@ -105,7 +135,7 @@ export default function FormMAB({ url }) {
                 }}
             >
                 {next ? (
-                    <SnapshotForm formData={formData} setFormData={setFormData} handleData={handleData} />
+                    <SnapshotForm formData={formData} setFormData={setFormData} handleData={handleData} snapshotData={snapshotData} />
                 ) : (
                     <>
                         {(loading || working) && (

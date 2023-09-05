@@ -15,8 +15,15 @@ const axiosInstance = axios.create({
 
 const getSnapshotsByUrl = async (url) => {
   try {
-    const response = await axiosInstance.get(`/snapshot?url=${url}`);
-    return response;
+    const regex = /\/[^/]+$/;
+    const normalUrl = url
+    const urlWithId = url.replace(regex, '') 
+
+    const response =  axiosInstance.get(`/snapshot?url=${normalUrl}`);
+    const responseWithId =  axiosInstance.get(`/snapshot?url=${urlWithId}`);
+    const finalResponse =  await Promise.all([response,responseWithId]);
+    console.log(finalResponse)
+    return  await Promise.all([response,responseWithId]);
   } catch (error) {
     // Handle error here
     console.error('Error fetching snapshots:', error);

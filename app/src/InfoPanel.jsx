@@ -182,7 +182,7 @@ function InfoPanel({ result }) {
                             </Box>
                         </AnimeCardContent>
                     </AnimeCard>
-                    <FormMAB url={url}/>
+                    <FormMAB result={result}/>
                 </Grid>
             </PanelGrid>
 
