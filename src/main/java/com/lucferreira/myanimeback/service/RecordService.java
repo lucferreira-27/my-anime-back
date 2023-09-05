@@ -16,7 +16,7 @@ public class RecordService {
     public Record getMediaRecord(String url){
 
         final String pattern = "^https:\\/\\/web\\.archive\\.org\\/web\\/" +
-                "(?<date>\\d{14})\\/(https?:\\/\\/)?myanimelist\\.net\\/" +
+                "(?<date>\\d{14})\\/(https?:\\/\\/)?myanimelist\\.net(:80)?\\/" +
                 "(?<category>anime|manga)\\/" +
                 "(?<id>\\d+)(?:\\/" +
                 "(?<title>[\\w-]+))?";
