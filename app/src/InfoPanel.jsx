@@ -1,8 +1,7 @@
 import React from 'react';
-import { Grid, Card, CardContent, Typography, Container, Box, Divider, Stack } from '@mui/material';
+import { Grid, Card, CardContent, Typography, Container, Box, Divider, Stack, Button, Paper } from '@mui/material';
 import { styled } from '@mui/system';
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-
+import FormMAB from './FormMAB';
 const PanelGrid = styled(Grid)(({ theme }) => ({
     backgroundColor: `#0d1117`,
     borderRadius: `5px`,
@@ -15,22 +14,20 @@ const PanelGrid = styled(Grid)(({ theme }) => ({
     },
 }));
 
-const AnimeDivider = styled(Divider)(({ theme }) => ({
-    color: `white`,
-    "&::before, &::after": {
-        borderColor: "white",
-    },
-}));
-
 const AnimeImage = styled('img')(({ theme }) => ({
-    width: `100%`,
-    maxWidth: `250px`,
-    height: `auto`,
+    width: '100%',
+    maxWidth: '250px',
+    height: 'auto',
     [theme.breakpoints.down('sm')]: {
-        maxWidth: `200px`,
+        maxWidth: '100%',
+        height: '250px',
+        objectFit: 'cover',
+        objectPosition: 'center',
+        borderRadius: '0px',
     },
-    borderRadius: `15px`,
-    borderColor: `red`,
+    borderRadius: '15px',
+    borderColor: 'red',
+    position: 'relative', // Required for overlay positioning
 }));
 
 const AnimeCard = styled(Card)(({ theme }) => ({
@@ -93,6 +90,15 @@ const ExtraAnimeInfo = styled(AnimeInfo)(({ theme }) => ({
     color: `#AEAEAE`,
 }));
 
+const MABCard = styled(`div`)(({ theme }) => ({
+    maxWidth: '550px',
+    backgroundColor: `transparent`,
+    [theme.breakpoints.down('sm')]: {
+        maxWidth: '100%',
+    },
+    marginTop: `3vh`
+}));
+
 
 function InfoPanel({ result }) {
     const {
@@ -106,7 +112,8 @@ function InfoPanel({ result }) {
         studios,
         type,
         season,
-        year
+        year,
+        url
     } = result;
 
     return (
@@ -114,18 +121,27 @@ function InfoPanel({ result }) {
             <PanelGrid container spacing={2}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={12}>
-                        <Divider flexItem sx={{
-                            color: `white`,
-                            "&::before, &::after": {
-                                borderColor: "white",
-                            },
-                        }}>
+                        <Divider
+                            flexItem
+                            sx={{
+                                color: `white`,
+                                "&::before, &::after": {
+                                    borderColor: "white",
+                                },
+                                mb: `20px`,
+                                fontSize: {
+                                    xs: '24px', // Adjust the font size for small screens (adjust as needed)
+                                    sm: '32px', // Font size for screens that match or are larger than 'sm' breakpoint
+                                },
+                            }}
+                        >
                             {title}
                         </Divider>
                     </Grid>
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <AnimeImage src={images.jpg.large_image_url} alt={title} />
+
+                        <AnimeImage src={images.jpg.large_image_url} alt={title} />
                 </Grid>
                 <Grid item xs={12} md={8}>
                     <AnimeCard>
@@ -166,6 +182,7 @@ function InfoPanel({ result }) {
                             </Box>
                         </AnimeCardContent>
                     </AnimeCard>
+                    <FormMAB url={url}/>
                 </Grid>
             </PanelGrid>
 

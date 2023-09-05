@@ -88,7 +88,7 @@ export default function SearchBar({result,setResult}) {
     const handleDebouncedSearch = useDebounce(handleSearch, DEBOUNCE_DELAY);
 
     return (
-        <Container maxWidth="md" sx={{ mt: 10 }}>
+        <Container maxWidth="md" sx={{ mt: 6 }}>
             <Box>
                 <SearchTextField
                     fontColor="green"
