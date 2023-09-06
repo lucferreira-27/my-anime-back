@@ -55,7 +55,7 @@ const convertUnit = (ms, unit) => {
 
 const sortSnapshots = (snapshots) => {
     return snapshots.sort((a, b) => {
-        return a.date < b.date
+        return a.date - b.date
     })
 }
 
@@ -142,12 +142,10 @@ function findClosestTo(date, arrayDates, direction) {
 // The main function to split the snapshots
 const getSplitSnapshots = (snapshots, config) => {
     // Initialize an empty array to store the split snapshots
-    const splitSnapshots = [];
     const { startDate: strStartDate, endDate: strEndDate, distanceType, distance } = config;
     const startDate = parseDate(strStartDate);
     const endDate = parseDate(strEndDate);
     const sortedDates = sortSnapshots(snapshots).map((snapshot) => snapshot.timestamp.date);
-    console.log(sortedDates)
     const startDateMilliseconds = getMillisecondsInDate(startDate);
     const endDateMilliseconds = getMillisecondsInDate(endDate);
     const datesInRange = [];
@@ -171,20 +169,26 @@ const getSplitSnapshots = (snapshots, config) => {
     }
     let nextDate = null
     const max = sortedDates.length
-    const  dates = sortedDates.map(d => new Date(d))
+    const dates = sortedDates.map(d => new Date(d))
+    const rangeDates = []
     for (let i = 0; i < max; i++) {
         const currentDateMilliseconds = nextDate || sortedDates[i]
-        if(currentDateMilliseconds < startDateMilliseconds || currentDateMilliseconds > endDateMilliseconds){
+        if (currentDateMilliseconds < startDateMilliseconds || currentDateMilliseconds > endDateMilliseconds) {
             continue
         }
         const currentDate = nextDate || new Date(currentDateMilliseconds)
         const targetDate = addUnit(currentDate, distance, distanceType)
-        nextDate = findClosestTo(targetDate,dates, 'forwards')
-        if(!nextDate){
+        nextDate = findClosestTo(targetDate, dates, 'forwards')
+        if (!nextDate) {
             break
         }
-        splitSnapshots.push(nextDate)
+        rangeDates.push(nextDate)
     }
+    const splitSnapshots = snapshots
+        .filter((snapshot) => rangeDates
+            .find(range => range.getTime() == snapshot.timestamp.date) 
+                && (snapshot.snapshotStatus.startsWith("2") || snapshot.snapshotStatus == "301") 
+        )
     return splitSnapshots;
 };
 

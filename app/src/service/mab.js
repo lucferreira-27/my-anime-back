@@ -31,9 +31,9 @@ const getSnapshotsByUrl = async (url) => {
   }
 };
 
-const getRecordByArchive = async (archiveUrl, range, distance) => {
+const getRecordByArchive = async (archiveUrls) => {
   try {
-    const response = await axiosInstance.get(`/record?archiveUrl=${archiveUrl}&range=${range}&distance=${distance}`);
+    const response = await axiosInstance.post('/record/media', archiveUrls);
     return response.data;
   } catch (error) {
     // Handle error here

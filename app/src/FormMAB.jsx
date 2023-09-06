@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LinearProgress, Grid, Card, CardContent, Typography, Container, Box, Divider, Stack, Button, Paper, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { styled } from '@mui/system';
 import useMABSearch from './hooks/useMABSearch'; // Import the custom hook
-
+import useResourceArchive from './hooks/useResourceArchive'; // Import the custom hook
 import SnapshotForm from './SnapshotForm';
 
 const MABCard = styled(`div`)(({ theme }) => ({
@@ -36,11 +36,15 @@ const adjustStartDate = (snapshotData, airedFrom) => {
 
 export default function FormMAB({ result }) {
     const { snapshotData, loading, error, performSearch } = useMABSearch();
+    const { resourceArchive, resouceLoading, resourceError, resourcePerformSearch } = useResourceArchive()
+    const {rangeDates, setRangeDates} = useState()
     const [progress, setProgress] = useState(0);
     const [working, setWorking] = useState(false)
     const [next, setNext] = useState(false)
     const { url, aired } = result
     const [formData, setFormData] = useState();
+
+
 
     useEffect(() => {
         if (snapshotData) {
@@ -101,6 +105,10 @@ export default function FormMAB({ result }) {
         performSearch(url);
     };
 
+    const handleRangeSnapshots = (splitSnapshots) =>{
+        setRangeDates(splitSnapshots)
+    }
+
     const handleData = () => {
         setNext(true)
     }
@@ -135,9 +143,15 @@ export default function FormMAB({ result }) {
                 }}
             >
                 {next ? (
-                    <SnapshotForm formData={formData} setFormData={setFormData} handleData={handleData} snapshotData={snapshotData} />
+                    <SnapshotForm formData={formData} setFormData={setFormData} handleRangeSnapshots={handleRangeSnapshots} snapshotData={snapshotData} />
                 ) : (
-                    <>
+                    <Box sx={{
+                        width: `100%`,
+                        mt: "15px",
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                    }}>
                         {(loading || working) && (
                             <>
                                 <LinearProgress
@@ -175,7 +189,7 @@ export default function FormMAB({ result }) {
                                 {!error ? `Next` : `Try Again`}
                             </Button>
                         )}
-                    </>
+                    </Box>
                 )}
             </Box>
         </MABCard>
