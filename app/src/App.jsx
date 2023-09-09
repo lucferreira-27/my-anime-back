@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, createContext } from 'react';
 import SearchBar from "./SearchBar";
 import { styled } from '@mui/system';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import { Container } from '@mui/material';
 import InfoPanel from './InfoPanel';
+import Timeline from './Timeline';
 
 const StyledAppBar = styled(AppBar)({
   backgroundColor: '#1450A3',
@@ -25,12 +26,17 @@ const AppName = styled('span')({
 
 });
 
+export const Context = createContext()
+
 function App() {
 
-  const [result, setResult] = useState()
 
+  const [media, setMedia] = useState()
+  const [resources, setResources] = useState([])
+  const [isShowTimeLine, setShowTimeline] = useState(false)
   return (
-    <div>
+    <Context.Provider value={{ media, setMedia, resources, setResources, isShowTimeLine, setShowTimeline }}>
+
       <StyledAppBar position="sticky">
         <Toolbar>
           <NavbarTitle>
@@ -38,14 +44,16 @@ function App() {
           </NavbarTitle>
         </Toolbar>
       </StyledAppBar>
-      <SearchBar result={result} setResult={setResult} />
+      <SearchBar />
       {
-        result && (
-          <InfoPanel result={result} />
-        )
+        media && <InfoPanel media={media} />
+      }
+      {
+        isShowTimeLine && <Timeline />
       }
 
-    </div>
+
+    </Context.Provider>
   );
 }
 

@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Button, Typography, Divider, LinearProgress, Box, FormControl, InputLabel, Select, MenuItem, Grid, TextField } from '@mui/material';
 import { styled } from '@mui/system';
 import useSplitSnapshots from './hooks/useSplitSnapshots'; // Import the custom hook
 import useResourceArchive from './hooks/useResourceArchive'; // Import the custom hook
-import { set } from 'date-fns/esm';
+import { Context } from './App';
 
 const FormContainer = styled('form')`
   display: grid;
@@ -57,10 +57,11 @@ const StyledTextField = styled(TextField)`
   }
 `;
 
-export default function SnapshotForm({ formData, setFormData, handleRangeSnapshots, snapshotData }) {
+export default function SnapshotForm({ formData, setFormData, snapshotData }) {
   const splitSnapshots = useSplitSnapshots(snapshotData, formData);
+  const { resources, setResources, setShowTimeline } = useContext(Context)
+
   const [working, setWorking] = useState(false)
-  const [resourceArchiveData, setResourceArchiveData] = useState([])
   const [progress, setProgress] = useState(0)
   const {
     loading,
@@ -75,7 +76,7 @@ export default function SnapshotForm({ formData, setFormData, handleRangeSnapsho
     const loadSnapshots = async () => {
       console.log('loadSnapshots');
       setWorking(true);
-      setResourceArchiveData([]);
+      setResources([]);
 
       for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
         const start = batchIndex * batchSize;
@@ -90,7 +91,7 @@ export default function SnapshotForm({ formData, setFormData, handleRangeSnapsho
         const validResults = batchResults.flat().filter((result) => result !== null);
 
         // Update state with valid results
-        setResourceArchiveData((prevData) => [...prevData, ...validResults]);
+        setResources((prevData) => [...prevData, ...validResults]);
 
         setProgress(((batchIndex + 1) / totalBatches) * 100);
       }
@@ -105,13 +106,14 @@ export default function SnapshotForm({ formData, setFormData, handleRangeSnapsho
 
   const viewTimeLine = () => {
     console.log(`view timeline`)
+    setShowTimeline(true)
   }
 
   useEffect(() => {
-    // This effect will run whenever resourceArchiveData changes.
+    // This effect will run whenever resources changes.
     // You can perform any additional actions here when data updates.
-    console.log('resourceArchiveData updated:', resourceArchiveData);
-  }, [resourceArchiveData]);
+    console.log('resources updated:', resources);
+  }, [resources]);
 
   return (
     <>
@@ -220,14 +222,13 @@ export default function SnapshotForm({ formData, setFormData, handleRangeSnapsho
                   }}
                 >
                   {error ? `Error` : (
-                    `${resourceArchiveData.length}/${splitSnapshots.length}`
+                    `${resources.length}/${splitSnapshots.length}`
                   )}
                 </Typography>
               </Box>
             ) : (
-              <Button variant="contained" sx={{ width: '100%' }} onClick={() => !working && resourceArchiveData
-                ? createTimeline() : viewTimeLine()}>
-                {!working && resourceArchiveData.length > 0 ? `VIEW TIMELINE` : `CREATE TIMELINE`}
+              <Button variant="contained" sx={{ width: '100%' }} onClick={() => !working && resources.length > 0 ? viewTimeLine() : createTimeline()}>
+                {!working && resources.length > 0 ? `VIEW TIMELINE` : `CREATE TIMELINE`}
               </Button>)
             }
           </Grid>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import {
     Container,
     InputAdornment,
@@ -14,7 +14,7 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { styled } from '@mui/system';
 import useJikanSearch from './hooks/useJikanSearch'; // Import the custom hook
 import useDebounce from './hooks/useDebounce'; // Import the custom hook
-
+import {Context} from "./App"
 const theme = createTheme({
     palette: {
         primary: {
@@ -42,7 +42,8 @@ const SearchTextField = styled(TextField)({
 
 
 
-export default function SearchBar({result,setResult}) {
+export default function SearchBar() {
+    const {media, setMedia} = useContext(Context)
     const [searchTerm, setSearchTerm] = useState('');
     const [isValidUrl, setIsValidUrl] = useState(true);
     const [isShowError, setShowError] = useState(false);
@@ -52,7 +53,7 @@ export default function SearchBar({result,setResult}) {
 
     useEffect(() =>{
         console.log(searchData)
-        setResult(searchData)
+        setMedia(searchData)
     },[searchData])
 
     useEffect(() => {

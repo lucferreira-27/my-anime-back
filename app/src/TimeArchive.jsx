@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { LinearProgress, Grid, Card, CardContent, Typography, Container, Box, Divider, Stack, Button, Paper, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { styled } from '@mui/system';
 import useMABSearch from './hooks/useMABSearch'; // Import the custom hook
 import useResourceArchive from './hooks/useResourceArchive'; // Import the custom hook
 import SnapshotForm from './SnapshotForm';
-
+import {Context} from './App'
 const MABCard = styled(`div`)(({ theme }) => ({
     maxWidth: '550px',
     backgroundColor: `transparent`,
@@ -34,14 +34,15 @@ const adjustStartDate = (snapshotData, airedFrom) => {
     return formatDate(startDate);
 };
 
-export default function FormMAB({ result }) {
+export default function TimeArchive() {
+    const {media} = useContext(Context)
     const { snapshotData, loading, error, performSearch } = useMABSearch();
     const { resourceArchive, resouceLoading, resourceError, resourcePerformSearch } = useResourceArchive()
     const {rangeDates, setRangeDates} = useState()
     const [progress, setProgress] = useState(0);
     const [working, setWorking] = useState(false)
     const [next, setNext] = useState(false)
-    const { url, aired } = result
+    const { url, aired } = media
     const [formData, setFormData] = useState();
 
 
@@ -126,9 +127,13 @@ export default function FormMAB({ result }) {
                     "&::before, &::after": {
                         borderColor: "white",
                     },
+                    letterSpacing: {
+                        xs: '3px', // Adjust the font size for small screens (adjust as needed)
+                        sm: '5px',
+                    },
                     fontSize: {
-                        xs: '18px', // Adjust the font size for small screens (adjust as needed)
-                        sm: '24px', // Font size for screens that match or are larger than 'sm' breakpoint
+                        xs: '16px', // Adjust the font size for small screens (adjust as needed)
+                        sm: '20px', // Font size for screens that match or are larger than 'sm' breakpoint
                     },
                 }}
             >
