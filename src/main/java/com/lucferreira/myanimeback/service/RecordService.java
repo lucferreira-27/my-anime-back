@@ -8,10 +8,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+
 @Service
 public class RecordService {
     @Autowired
     private ScrapeService scrapeService;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(5); // Adjust the pool size as needed
 
     public Record getMediaRecord(String url){
 
@@ -27,6 +34,27 @@ public class RecordService {
         }
         Record record = scrapeService.getMediaStatistics(url);
         return record;
+    }
+
+    public List<Record> getMediaRecords(List<String> urls) {
+        List<CompletableFuture<Record>> futures = urls.stream()
+                .map(url -> CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return getMediaRecord(url);
+                    } catch (Exception e) {
+                        // Handle exceptions within this CompletableFuture
+                        e.printStackTrace();
+                        return null; // or handle the exception as needed
+                    }
+                }, executorService))
+                .collect(Collectors.toList());
+
+        List<Record> records = futures.stream()
+                .map(CompletableFuture::join)
+                .filter(record -> record != null) // Filter out failed tasks
+                .collect(Collectors.toList());
+
+        return records;
     }
 
     public TopList getTopListRecord(String url){
