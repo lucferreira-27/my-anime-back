@@ -1,5 +1,7 @@
 package com.lucferreira.myanimeback.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.*;
 
 public class TopList {
@@ -8,11 +10,12 @@ public class TopList {
     private TopSubtype topSubtype;
 
     private String archiveUrl;
-
-    public TopList(TopType topType, TopSubtype topSubtype, String archiveUrl){
+    private Date archiveDate;
+    public TopList(TopType topType, TopSubtype topSubtype, String archiveUrl,Date archiveDate){
         this.topType = topType;
         this.topSubtype = topSubtype;
         this.archiveUrl = archiveUrl;
+        this.archiveDate = archiveDate;
     }
 
     public void addTopListItemToMap(TopListItem record){
@@ -44,6 +47,11 @@ public class TopList {
 
     public String getArchiveUrl() {
         return archiveUrl;
+    }
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+    public Date getArchiveDate() {
+        return archiveDate;
     }
 
     public enum TopType {

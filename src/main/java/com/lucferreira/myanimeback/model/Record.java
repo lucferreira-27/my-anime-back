@@ -1,5 +1,9 @@
 package com.lucferreira.myanimeback.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.util.Date;
+
 public class Record {
     private Double scoreValue;
     private Integer totalVotes;
@@ -8,6 +12,8 @@ public class Record {
     private Integer ranked;
     private Integer favorites;
     private String archiveUrl;
+
+    private Date archiveDate;
 
     public Double getScoreValue() {
         return scoreValue;
@@ -65,7 +71,13 @@ public class Record {
         this.archiveUrl = archiveUrl;
     }
 
-    private Record(Double scoreValue, Integer totalVotes, Integer popularity, Integer ranked , Integer members, Integer favorites, String archiveUrl) {
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
+
+    public Date getArchiveDate() {
+        return archiveDate;
+    }
+
+    private Record(Double scoreValue, Integer totalVotes, Integer popularity, Integer ranked , Integer members, Integer favorites, String archiveUrl, Date archiveDate) {
         this.scoreValue = scoreValue;
         this.totalVotes = totalVotes;
         this.popularity = popularity;
@@ -73,6 +85,7 @@ public class Record {
         this.favorites = favorites;
         this.archiveUrl = archiveUrl;
         this.ranked = ranked;
+        this.archiveDate = archiveDate;
     }
 
     public static class Builder {
@@ -83,7 +96,7 @@ public class Record {
         private Integer favorites;
         private Integer ranked;
         private String archiveUrl;
-
+        private Date archiveDate;
         public Builder scoreValue(Double scoreValue) {
             this.scoreValue = scoreValue;
             return this;
@@ -116,9 +129,12 @@ public class Record {
             this.archiveUrl = archiveUrl;
             return this;
         }
-
+        public Builder archiveDate(Date archiveDate) {
+            this.archiveDate = archiveDate;
+            return this;
+        }
         public Record build() {
-            return new Record(scoreValue, totalVotes, popularity, ranked,members, favorites, archiveUrl);
+            return new Record(scoreValue, totalVotes, popularity, ranked,members, favorites, archiveUrl,archiveDate);
         }
     }
 }

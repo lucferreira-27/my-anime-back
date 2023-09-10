@@ -34,6 +34,7 @@ public class TopScrape extends PageScraper<TopList> {
     public TopList scrape(String url) throws ArchiveScraperException{
         Connection.Response response = scrapeHelper.connectToUrl(url);
         Document doc = scrapeHelper.jsoupParse(response);
+
         Optional<DocElement> optional = scrapeHelper.queryElements(doc, null, TopListAnchors.TOP_LIST_INIT.getSelectors());
         optional.orElseThrow(() -> new SelectorQueryException("No elements found for the given selectors."));
         DocElement docElement = optional.get();
@@ -45,7 +46,7 @@ public class TopScrape extends PageScraper<TopList> {
         return topList;
     }
 
-    private TopList processElements(ListElementID listElementID, Document doc) throws SelectorQueryException, ScrapeParseError {
+    private TopList processElements(ListElementID listElementID, Document doc) throws ArchiveScraperException {
         List<TopListAnchors> topListAnchors = List.of(TopListAnchors.values());
 
         TopList topList = topListFactory.createTopList(doc.baseUri());
