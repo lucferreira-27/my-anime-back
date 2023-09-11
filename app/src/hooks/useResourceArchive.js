@@ -12,7 +12,6 @@ const useResourceArchive = (snapshots) => {
         setError(null);
 
         try {
-            console.log(snapshots)
             const data = await getRecordByArchive(snapshots.map(s => s.url));
             setCurrentResourceData(data);
             return data

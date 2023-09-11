@@ -18,9 +18,9 @@ const AnimatedResourceProgressNumber = animated(ResourceProgressNumber)
 const ProgressSection = ({ progress, error, resources, splitSnapshots }) => {
 
     const resourceProgressSpring = useSpring({
-        to: { resources: resources.length,range: splitSnapshots.length },
-        from: { resources:resources.length,range: splitSnapshots.length }, // You can change the initial value
-      });
+        to: { resources: resources.length, range: splitSnapshots.length },
+        from: { resources: 0, range: splitSnapshots.length }, // You can change the initial value
+    });
 
     return (
         <Box sx={{ mt: "5px", display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

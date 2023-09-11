@@ -131,6 +131,7 @@ function Timeline() {
                 >
                     <Stack alignItems="center">
                         <Slider
+                            marks
                             max={resources.length}
                             sx={{
                                 color: `primary`,

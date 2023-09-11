@@ -42,7 +42,7 @@ export default function TimeArchive() {
     const [progress, setProgress] = useState(0);
     const [working, setWorking] = useState(false)
     const [next, setNext] = useState(false)
-    const { url, aired } = media
+    const { url, aired,published } = media
     const [formData, setFormData] = useState();
 
 
@@ -50,7 +50,7 @@ export default function TimeArchive() {
     useEffect(() => {
         if (snapshotData) {
             setFormData({
-                startDate: adjustStartDate(snapshotData, aired.from),
+                startDate: adjustStartDate(snapshotData, aired ? aired.from : published.from),
                 endDate: formatDate(new Date()),
                 distanceType: 'months',
                 distance: '6',

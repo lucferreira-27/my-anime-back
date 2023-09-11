@@ -34,33 +34,35 @@ const AnimatedResourceProgressNumber = animated(ResourceProgressNumber)
 export default function SnapshotForm({ formData, setFormData, snapshotData }) {
   const splitSnapshots = useSplitSnapshots(snapshotData, formData);
   const { resources, setResources, setShowTimeline } = useContext(Context)
-
+  const [submitBtn, setSubmitBtn] = useState(true)
   const [working, setWorking] = useState(false)
   const [progress, setProgress] = useState(0)
+  
   const {
     loading,
     error,
     getNextSnapshot,
   } = useResourceArchive(splitSnapshots)
 
+
   const resourceProgressSpring = useSpring({
     to: { resources: resources.length, range: splitSnapshots.length },
-    from: { score: resources.length, range: splitSnapshots.length }, // You can change the initial value
+    from: { resources: 0, range: 0 }, // You can change the initial value
   });
 
-  const createTimeline = async () => {
+  const createTimeline = () => {
     const batchSize = 8; // Number of URLs to send in each batch
     const totalBatches = Math.ceil(splitSnapshots.length / batchSize);
+    setProgress(0)
+    setResources([])
 
     const loadSnapshots = async () => {
-      console.log('loadSnapshots');
+      console.log('loadSnapshots',totalBatches,splitSnapshots.length);
       setWorking(true);
-      setResources([]);
-
       for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
         const start = batchIndex * batchSize;
         const end = start + batchSize;
-        const batchUrls = splitSnapshots.slice(start, end);
+        const batchUrls = [...splitSnapshots].slice(start, end);
 
         const batchPromises = [getNextSnapshot(batchUrls)]; // Pass the batchUrls to getNextSnapshot
 
@@ -81,8 +83,27 @@ export default function SnapshotForm({ formData, setFormData, snapshotData }) {
 
   const viewTimeLine = () => {
     setResources(resources.sort((a, b) => new Date(a.archiveDate).getTime() - new Date(b.archiveDate).getTime()))
-    setShowTimeline(true)
+    setShowTimeline(true) 
   }
+
+  useEffect(() =>{
+    setSubmitBtn(true)
+  },[formData])
+
+  useEffect(() => {
+    console.log(!working,resources.length > 0)
+
+    if (!working && resources.length > 0) {
+      setSubmitBtn(false)
+    } else {
+      setSubmitBtn(true)
+    }
+  }, [working])
+
+
+  useEffect(() =>{
+    console.log(submitBtn)
+  },[submitBtn])
 
   return (
     <>
@@ -103,15 +124,15 @@ export default function SnapshotForm({ formData, setFormData, snapshotData }) {
                   alignSelf: 'center',
                 }}
               >
-                {resourceProgressSpring.range.to((value) => `It's projected that ${Math.floor(value)} snapshots will be part of this timeline of ${snapshotData?.length}.`)}
+                { resourceProgressSpring.range.to((value) => `It's projected that ${Math.floor(value)} snapshots will be part of this timeline of ${snapshotData?.length}.`)}
               </AnimatedResourceProgressNumber>
             </Box>
           </Grid>
           <Grid item xs={12}>
             {working ? (
-              <ProgressSection working={working} resources={resources} progress={progress} error={error}  splitSnapshots={splitSnapshots} />
+              <ProgressSection working={working} resources={resources} progress={progress} error={error} splitSnapshots={splitSnapshots} />
             ) : (
-              <SubmitButton working={working} resources={resources} onClick={resources.length <= 0 ? createTimeline : viewTimeLine}  />
+              submitBtn ? <SubmitButton text = {`CREATE TIMELINE`} onClick = {createTimeline} /> :  <SubmitButton text = {`VIEW TIMELINE`} onClick = {viewTimeLine} />
             )}
           </Grid>
 

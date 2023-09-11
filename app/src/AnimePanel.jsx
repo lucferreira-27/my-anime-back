@@ -101,7 +101,7 @@ const ExtraAnimeInfo = styled(AnimeInfo)(({ theme }) => ({
 
 
 export default function AnimePanel({ media, copyMal, darkMode }) {
-    const { rank, popularity, members, season, year, type, studios, score, scored_by } = media
+    const { rank, popularity, members, season, year, type, studios, serializations, score, authors, scored_by } = media
 
     return (
 
@@ -143,21 +143,38 @@ export default function AnimePanel({ media, copyMal, darkMode }) {
                         <Stack sx={{
                             mt: `25px`
                         }} direction="row" spacing={2}>
-                            <ExtraAnimeInfo variant="body1">{`${season.replace(/\b\w/g, (match) => match.toUpperCase())} ${year}`}</ExtraAnimeInfo>
+                            {season && (
+                                <>
+                                    <Divider flexItem orientation='vertical' sx={{
+                                        mx: 2,
+                                        backgroundColor: copyMal ? `#272727` : `gray`,
+                                        boxShadow: copyMal ? `#121212 1px 0 1px 0` : ``
+
+                                    }
+                                    } />
+                                    <ExtraAnimeInfo variant="body1">{`${season?.replace(/\b\w/g, (match) => match.toUpperCase())} ${year}`}</ExtraAnimeInfo>
+                                </>
+                            )}
+
+                            <ExtraAnimeInfo variant="body1">{type}</ExtraAnimeInfo>
                             <Divider flexItem orientation='vertical' sx={{
                                 mx: 2,
                                 backgroundColor: copyMal ? `#272727` : `gray`,
                                 boxShadow: copyMal ? `#121212 1px 0 1px 0` : ``
 
                             }
-                            } />                            <ExtraAnimeInfo variant="body1">{type}</ExtraAnimeInfo>
+                            } />
+                            {studios && <ExtraAnimeInfo variant="body1">{studios[0]?.name}</ExtraAnimeInfo>}
+                            {serializations && <ExtraAnimeInfo variant="body1">{serializations[0]?.name}</ExtraAnimeInfo>}
                             <Divider flexItem orientation='vertical' sx={{
                                 mx: 2,
                                 backgroundColor: copyMal ? `#272727` : `gray`,
                                 boxShadow: copyMal ? `#121212 1px 0 1px 0` : ``
 
                             }
-                            } />                            <ExtraAnimeInfo variant="body1">{studios[0]?.name}</ExtraAnimeInfo>
+                            } />
+                            {authors && <ExtraAnimeInfo variant="body1">{authors[0]?.name}</ExtraAnimeInfo>}
+
                         </Stack>
                     </Box>
                 </AnimeCardContent>
