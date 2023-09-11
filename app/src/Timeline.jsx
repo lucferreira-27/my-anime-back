@@ -22,6 +22,8 @@ function Timeline() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isReseting, setIsReset] = useState(false);
 
+    
+
     const handleSliderChange = (event, newValue) => {
         setSliderValue(newValue); // Update the state when the slider value changes
     };
@@ -38,12 +40,13 @@ function Timeline() {
 
         const currentResource = resources[sliderValue]
         if (currentResource) {
-            console.log(timeMedia)
+            timeMedia.archiveDate = currentResource.archiveDate
             timeMedia.score = currentResource.scoreValue
             timeMedia.rank = currentResource.ranked
             timeMedia.members = currentResource.members
             timeMedia.popularity = currentResource.popularity
             timeMedia.scored_by = currentResource.totalVotes
+            setTimeMedia({...timeMedia})
         }
 
     }, [sliderValue])

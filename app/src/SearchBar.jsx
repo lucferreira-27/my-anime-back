@@ -14,7 +14,7 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { styled } from '@mui/system';
 import useJikanSearch from './hooks/useJikanSearch'; // Import the custom hook
 import useDebounce from './hooks/useDebounce'; // Import the custom hook
-import {Context} from "./App"
+import { Context } from "./App"
 const theme = createTheme({
     palette: {
         primary: {
@@ -43,7 +43,7 @@ const SearchTextField = styled(TextField)({
 
 
 export default function SearchBar() {
-    const {media, setMedia} = useContext(Context)
+    const { media, setMedia, isShowTimeLine, setShowTimeline,resources,setResources } = useContext(Context)
     const [searchTerm, setSearchTerm] = useState('');
     const [isValidUrl, setIsValidUrl] = useState(true);
     const [isShowError, setShowError] = useState(false);
@@ -51,10 +51,22 @@ export default function SearchBar() {
 
     const inputRef = useRef(null);
 
-    useEffect(() =>{
+
+    useEffect(() => {
+        if (!media) {
+            if(isShowTimeLine){
+                setShowTimeline(false)
+            }
+            if(resources){
+                setResources([])
+            }
+        }
+    }, [media])
+
+    useEffect(() => {
         console.log(searchData)
         setMedia(searchData)
-    },[searchData])
+    }, [searchData])
 
     useEffect(() => {
         const urlPattern = /^https:\/\/myanimelist\.net\/anime|manga\/\d+(\/.*)?$/;
@@ -70,7 +82,7 @@ export default function SearchBar() {
     }, [isValidUrl])
 
     const handleChange = (event) => {
-        if(!searchData){
+        if (!searchData) {
             setSearchTerm(event.target.value);
         }
     };
@@ -84,6 +96,7 @@ export default function SearchBar() {
         setSearchData(null);
         setError(null);
         setIsValidUrl(true);
+        setMedia(null)
     };
     const DEBOUNCE_DELAY = 300; // milliseconds
     const handleDebouncedSearch = useDebounce(handleSearch, DEBOUNCE_DELAY);

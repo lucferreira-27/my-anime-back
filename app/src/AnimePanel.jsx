@@ -1,6 +1,7 @@
 import { React, createContext, useContext } from 'react'
 import { Stack, Divider, Box, Typography, Card, CardContent } from '@mui/material';
 import { styled } from '@mui/system';
+import { useSpring, animated } from 'react-spring'; // Import the necessary components from react-spring
 
 
 
@@ -23,7 +24,7 @@ function CopyMalProvider({ children, copyMal }) {
 
 
 
-const AnimeCard = styled(Card)(({ theme }) => ({
+const AnimeCard = animated(styled(Card)(({ theme }) => ({
 
     '& .MuiTypography-body1': {
         fontFamily: useCopyMal() && `Avenir,lucida grande,tahoma,verdana,arial,sans-serif`,
@@ -35,21 +36,23 @@ const AnimeCard = styled(Card)(({ theme }) => ({
     flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
+    width: useCopyMal() && '550px',
     maxWidth: '550px',
     [theme.breakpoints.down('sm')]: {
         maxWidth: '100%',
     },
-}));
+})))
 
-const AnimeCardContent = styled(CardContent)(({ theme }) => ({
+const AnimeCardContent = animated(styled(CardContent)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-}));
+})))
 
 
 
 const ScoreContainer = styled(Box)(({ theme }) => ({
+    width: useCopyMal() && `75px`,
     margin: `auto`,
     justifyContent: `center`,
     textAlign: `center`,
@@ -87,6 +90,9 @@ const InfoValue = styled('span')(({ theme, copyMal }) => ({
 }));
 
 
+const AnimatedScoreValue = animated(ScoreValue); // Wrap ScoreValue with animated
+const AnimatedScoreUserCount = animated(ScoreUserCount); // Wrap ScoreValue with animated
+const AnimatedInfoValue = animated(InfoValue); // Wrap ScoreValue with animated
 
 const ExtraAnimeInfo = styled(AnimeInfo)(({ theme }) => ({
     fontSize: '12px',
@@ -96,6 +102,7 @@ const ExtraAnimeInfo = styled(AnimeInfo)(({ theme }) => ({
 
 export default function AnimePanel({ media, copyMal, darkMode }) {
     const { rank, popularity, members, season, year, type, studios, score, scored_by } = media
+
     return (
 
         <CopyMalProvider copyMal={copyMal}>
@@ -103,6 +110,7 @@ export default function AnimePanel({ media, copyMal, darkMode }) {
                 <AnimeCardContent>
                     <ScoreContainer>
                         <ScoreLabel>SCORE</ScoreLabel>
+
                         <ScoreValue>{score.toFixed(2)}</ScoreValue>
                         <ScoreUserCount>{scored_by.toLocaleString()} users</ScoreUserCount>
                     </ScoreContainer>

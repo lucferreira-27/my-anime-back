@@ -1,4 +1,4 @@
-import { useState, createContext } from 'react';
+import { useState, createContext,useEffect } from 'react';
 import SearchBar from "./SearchBar";
 import { styled } from '@mui/system';
 import AppBar from '@mui/material/AppBar';
@@ -32,6 +32,7 @@ function App() {
 
 
   const [media, setMedia] = useState()
+
   const [resources, setResources] = useState([])
   const [isShowTimeLine, setShowTimeline] = useState(false)
   return (
