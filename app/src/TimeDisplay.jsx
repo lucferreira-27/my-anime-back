@@ -59,7 +59,7 @@ const OutsideBox = styled(Box)(({ theme }) => ({
     [theme.breakpoints.down('md')]: { // Apply scale on screens less than or equal to 'sm' breakpoint
         alignItems: 'center',
         justifyContent: 'center', // Center vertically and horizontally
-        transform: 'scale(0.9)', // Scale down by 20%
+        transform: 'scale(0.85)', // Scale down by 20%
     },
 }));
 
