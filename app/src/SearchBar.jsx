@@ -64,7 +64,6 @@ export default function SearchBar() {
     }, [media])
 
     useEffect(() => {
-        console.log(searchData)
         setMedia(searchData)
     }, [searchData])
 

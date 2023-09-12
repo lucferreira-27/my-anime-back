@@ -57,7 +57,6 @@ export default function SnapshotForm({ formData, setFormData, snapshotData }) {
     setResources([])
 
     const loadSnapshots = async () => {
-      console.log('loadSnapshots',totalBatches,splitSnapshots.length);
       setWorking(true);
       for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
         const start = batchIndex * batchSize;
@@ -91,8 +90,6 @@ export default function SnapshotForm({ formData, setFormData, snapshotData }) {
   },[formData])
 
   useEffect(() => {
-    console.log(!working,resources.length > 0)
-
     if (!working && resources.length > 0) {
       setSubmitBtn(false)
     } else {
@@ -100,10 +97,6 @@ export default function SnapshotForm({ formData, setFormData, snapshotData }) {
     }
   }, [working])
 
-
-  useEffect(() =>{
-    console.log(submitBtn)
-  },[submitBtn])
 
   return (
     <>

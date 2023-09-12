@@ -110,7 +110,6 @@ export default function AnimePanel({ media, copyMal, darkMode }) {
                 <AnimeCardContent>
                     <ScoreContainer>
                         <ScoreLabel>SCORE</ScoreLabel>
-
                         <ScoreValue>{score.toFixed(2)}</ScoreValue>
                         <ScoreUserCount>{scored_by.toLocaleString()} users</ScoreUserCount>
                     </ScoreContainer>

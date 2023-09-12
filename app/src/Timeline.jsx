@@ -6,23 +6,62 @@ import {
     Box,
     Slider,
     Stack,
+    TextField,
+    Typography,
 } from '@mui/material';
 import PauseRounded from '@mui/icons-material/PauseRounded';
 import PlayArrowRounded from '@mui/icons-material/PlayArrowRounded';
 import { Context } from "./App"
 import TimeDisplay from './TimeDisplay';
 import { styled } from '@mui/system';
+import { useSpring, animated } from 'react-spring'; // Import the necessary components from react-spring
 
+const TimelineDate = styled(Typography)(({ theme }) => ({
+    color: `gray`,
+}));
 
+const AnimatedTimelineDate = animated(TimelineDate)
+
+const StyledTextField = styled(TextField)`
+    width: 100px;
+  & label.MuiFormLabel-root {
+    color: white;
+  }
+
+  & .MuiInputBase-root {
+
+    color: #AEAEAE;
+  }
+
+  .MuiInput-underline:before {
+    border-bottom: 2px solid gray;
+  }
+  /* hover (double-ampersand needed for specificity reasons. */
+  && .MuiInput-underline:hover:before {
+    border-bottom: 2px solid white;
+  }
+  /* focused */
+  .MuiInput-underline:after {
+    border-bottom: 2px solid white;
+  }
+
+`;
 
 function Timeline() {
     const { resources, media } = useContext(Context)
     const [timeMedia, setTimeMedia] = useState({ ...media })
     const [sliderValue, setSliderValue] = useState(0); // Initialize with an initial value
+    const [currentDate, setCurrentDate] = useState(null)
     const [isPlaying, setIsPlaying] = useState(false);
     const [isReseting, setIsReset] = useState(false);
+    const [duration, setDuration] = useState(15)
+    const milesecondsDateSpring = useSpring({
+        to: { milesecondsDate: currentDate },
+        from: { milesecondsDate: 0 }, // You can change the initial value
+        config: { duration: (duration / resources.length) }, // Duration in milliseconds (2 seconds in this example)
 
-    
+    });
+
 
     const handleSliderChange = (event, newValue) => {
         setSliderValue(newValue); // Update the state when the slider value changes
@@ -37,7 +76,6 @@ function Timeline() {
     };
 
     useEffect(() => {
-
         const currentResource = resources[sliderValue]
         if (currentResource) {
             timeMedia.archiveDate = currentResource.archiveDate
@@ -46,7 +84,8 @@ function Timeline() {
             timeMedia.members = currentResource.members
             timeMedia.popularity = currentResource.popularity
             timeMedia.scored_by = currentResource.totalVotes
-            setTimeMedia({...timeMedia})
+            setTimeMedia({ ...timeMedia })
+            setCurrentDate(new Date(currentResource.archiveDate).getTime())
         }
 
     }, [sliderValue])
@@ -75,7 +114,7 @@ function Timeline() {
                 setSliderValue((prevValue) =>
                     prevValue + 1 <= resources.length ? prevValue + 1 : resources.length
                 );
-            }, 100); // Update the slider value every 100ms (adjust as needed)
+            }, (duration / resources.length) * 1000); // Update the slider value every 100ms (adjust as needed)
         } else {
             if (isPlaying) {
                 togglePlayPause()
@@ -129,7 +168,7 @@ function Timeline() {
                         width: '100%',
                     }}
                 >
-                    <Stack alignItems="center">
+                    <Stack >
                         <Slider
                             marks
                             max={resources.length}
@@ -173,36 +212,54 @@ function Timeline() {
                             disabled={false}
                         />
                         <Stack
-                            spacing={2}
                             direction="row"
-                            sx={{ mb: 1, px: 1 }}
-                            alignItems="center"
-                        >
-                            {isPlaying ? (
-                                <PauseRounded
-                                    sx={{
-                                        fontSize: '3rem',
-                                        color: 'white',
-                                        cursor: 'pointer',
-                                        '&:hover': {
-                                            transform: 'scale(1.1)', // Add hover effect
-                                        },
-                                    }}
-                                    onClick={togglePlayPause}
-                                />
-                            ) : (
-                                <PlayArrowRounded
-                                    sx={{
-                                        fontSize: '3rem',
-                                        color: 'white',
-                                        cursor: 'pointer',
-                                        '&:hover': {
-                                            transform: 'scale(1.1)', // Add hover effect
-                                        },
-                                    }}
-                                    onClick={togglePlayPause}
-                                />
-                            )}
+                            justifyContent="space-between"
+                            alignItems="flex-start"
+                            spacing={2}>
+                            <AnimatedTimelineDate>
+                                {milesecondsDateSpring.milesecondsDate.to((value) =>
+                                    `${new Date(value).toLocaleDateString("en-US", {
+                                        year: "numeric",
+                                        month: "2-digit",
+                                        day: "2-digit",
+                                    })}`
+                                )}
+                            </AnimatedTimelineDate>
+                            <div>
+                                {isPlaying ? (
+                                    <PauseRounded
+                                        sx={{
+                                            fontSize: '3rem',
+                                            color: 'white',
+                                            cursor: 'pointer',
+                                            '&:hover': {
+                                                transform: 'scale(1.1)', // Add hover effect
+                                            },
+                                        }}
+                                        onClick={togglePlayPause}
+                                    />
+                                ) : (
+                                    <PlayArrowRounded
+                                        sx={{
+                                            fontSize: '3rem',
+                                            color: 'white',
+                                            cursor: 'pointer',
+                                            '&:hover': {
+                                                transform: 'scale(1.1)', // Add hover effect
+                                            },
+                                        }}
+                                        onClick={togglePlayPause}
+                                    />
+                                )}
+                            </div>
+                            <StyledTextField
+                                label="Player duration"
+                                id="distance"
+                                type="number"
+                                variant="standard"
+                                onChange={(e) => setDuration(e.target.value)}
+                                value={duration}
+                            />
                         </Stack>
                     </Stack>
                 </Paper>
@@ -219,11 +276,11 @@ function Timeline() {
                         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
                     }}
                 >
-                    <TimeDisplay timeMedia={timeMedia}/>
+                    <TimeDisplay timeMedia={timeMedia} />
                     {/* Content inside the Paper component */}
                 </Paper>
             </Box>
-        </Container>
+        </Container >
     );
 }
 

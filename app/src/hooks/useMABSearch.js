@@ -16,9 +16,6 @@ const useMABSearch = () => {
             setError(null);
             const [{ data:data1 },{ data:data2 }] = await getSnapshotsByUrl(url);
             const data = [...data1,...data2].sort((a, b) =>  a.timestamp.date - b.timestamp.date)
-            console.log(data1)
-            console.log(data2)
-            console.log(data)
 
             setSnapshotData(data);
         } catch (error) {

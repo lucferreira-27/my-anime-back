@@ -22,7 +22,6 @@ const getSnapshotsByUrl = async (url) => {
     const response =  axiosInstance.get(`/snapshot?url=${normalUrl}`);
     const responseWithId =  axiosInstance.get(`/snapshot?url=${urlWithId}`);
     const finalResponse =  await Promise.all([response,responseWithId]);
-    console.log(finalResponse)
     return  await Promise.all([response,responseWithId]);
   } catch (error) {
     // Handle error here

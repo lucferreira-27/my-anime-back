@@ -102,7 +102,6 @@ export default function TimeArchive() {
 
     const handleSearch = () => {
         setWorking(true)
-        console.log(`test`);
         performSearch(url);
     };
 
@@ -115,7 +114,6 @@ export default function TimeArchive() {
     }
 
     useEffect(() => {
-        console.log(snapshotData);
     }, [snapshotData]);
 
     return (
