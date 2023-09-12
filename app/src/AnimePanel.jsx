@@ -38,9 +38,7 @@ const AnimeCard = animated(styled(Card)(({ theme }) => ({
     alignItems: 'flex-start',
     width: useCopyMal() && '550px',
     maxWidth: '550px',
-    [theme.breakpoints.down('sm')]: {
-        maxWidth: '100%',
-    },
+
 })))
 
 const AnimeCardContent = animated(styled(CardContent)(({ theme }) => ({
@@ -144,6 +142,7 @@ export default function AnimePanel({ media, copyMal, darkMode }) {
                         }} direction="row" spacing={2}>
                             {season && (
                                 <>
+                                    <ExtraAnimeInfo variant="body1">{`${season?.replace(/\b\w/g, (match) => match.toUpperCase())} ${year}`}</ExtraAnimeInfo>
                                     <Divider flexItem orientation='vertical' sx={{
                                         mx: 2,
                                         backgroundColor: copyMal ? `#272727` : `gray`,
@@ -151,7 +150,6 @@ export default function AnimePanel({ media, copyMal, darkMode }) {
 
                                     }
                                     } />
-                                    <ExtraAnimeInfo variant="body1">{`${season?.replace(/\b\w/g, (match) => match.toUpperCase())} ${year}`}</ExtraAnimeInfo>
                                 </>
                             )}
 
@@ -163,15 +161,18 @@ export default function AnimePanel({ media, copyMal, darkMode }) {
 
                             }
                             } />
-                            {studios && <ExtraAnimeInfo variant="body1">{studios[0]?.name}</ExtraAnimeInfo>}
-                            {serializations && <ExtraAnimeInfo variant="body1">{serializations[0]?.name}</ExtraAnimeInfo>}
-                            <Divider flexItem orientation='vertical' sx={{
-                                mx: 2,
-                                backgroundColor: copyMal ? `#272727` : `gray`,
-                                boxShadow: copyMal ? `#121212 1px 0 1px 0` : ``
-
-                            }
-                            } />
+                            {studios && (<>
+                                <ExtraAnimeInfo variant="body1">{studios[0]?.name}</ExtraAnimeInfo>
+                            </>)}
+                            {serializations && (<>
+                                <ExtraAnimeInfo variant="body1">{serializations[0]?.name}</ExtraAnimeInfo>
+                                <Divider flexItem orientation='vertical' sx={{
+                                    mx: 2,
+                                    backgroundColor: copyMal ? `#272727` : `gray`,
+                                    boxShadow: copyMal ? `#121212 1px 0 1px 0` : ``
+                                }
+                                } />
+                            </>)}
                             {authors && <ExtraAnimeInfo variant="body1">{authors[0]?.name}</ExtraAnimeInfo>}
 
                         </Stack>

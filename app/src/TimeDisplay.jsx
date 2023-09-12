@@ -7,8 +7,8 @@ import { Box, Typography } from '@mui/material';
 const CenteredBox = styled(Box)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'top',
-    justifyContent: 'top', // Center vertically and horizontally
+    alignItems: 'center', // Change 'top' to 'center'
+    justifyContent: 'center',
 }));
 
 const DisplayBox = styled(Box)(({ theme }) => ({
@@ -29,12 +29,12 @@ const InsideDisplayBox = styled(Box)(({ theme }) => ({
     zIndex: 1, // Set a higher z-index value
     width: `100%`,
     height: `100%`,
-    mt: `0px`,
     backgroundColor: 'rgba(0, 0, 0, 0.5)', // Add a semi-transparent background
 }));
 
 
 const Background = styled("div")(({ theme }) => ({
+    border: "1px solid gray",
     position: 'relative',
     width: '600px',
     height: '337.5px',
@@ -42,6 +42,7 @@ const Background = styled("div")(({ theme }) => ({
 }));
 
 const BackgroundImage = styled("div")(({ theme, timeMedia }) => ({
+
     position: 'absolute',
     top: 0,
     left: 0,
@@ -54,6 +55,15 @@ const BackgroundImage = styled("div")(({ theme, timeMedia }) => ({
     filter: 'blur(2.5px)', // Apply a blur filter to the background image
 }));
 
+const OutsideBox = styled(Box)(({ theme }) => ({
+    [theme.breakpoints.down('md')]: { // Apply scale on screens less than or equal to 'sm' breakpoint
+        alignItems: 'center',
+        justifyContent: 'center', // Center vertically and horizontally
+        transform: 'scale(0.9)', // Scale down by 20%
+    },
+}));
+
+
 export default function TimeDisplay({ timeMedia }) {
     const formatDate = (originalDate) => {
         return new Date(originalDate).toLocaleDateString("en-US", {
@@ -63,7 +73,7 @@ export default function TimeDisplay({ timeMedia }) {
         });
     }
     return (
-        <Box sx={{
+        <OutsideBox sx={{
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'left',
@@ -80,7 +90,7 @@ export default function TimeDisplay({ timeMedia }) {
                                 width: `100%`,
                                 mb: `30%`,
                                 textAlign: `center`,
-                                backgroundColor: `#0288d1`,
+                                backgroundColor: `rgba(2, 136, 209, 0.5)`,
                                 color: '#fff', // Set text color to white
                             }}>{`${timeMedia.title} - ${formatDate(timeMedia.archiveDate)}`}</Typography>
                             <AnimePanel sx={{
@@ -90,7 +100,7 @@ export default function TimeDisplay({ timeMedia }) {
                 </Background>
             </DisplayBox>
 
-        </Box>
+        </OutsideBox>
 
     );
 }

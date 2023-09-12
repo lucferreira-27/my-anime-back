@@ -47,6 +47,7 @@ const StyledTextField = styled(TextField)`
 
 `;
 
+
 function Timeline() {
     const { resources, media } = useContext(Context)
     const [timeMedia, setTimeMedia] = useState({ ...media })
@@ -58,7 +59,7 @@ function Timeline() {
     const milesecondsDateSpring = useSpring({
         to: { milesecondsDate: currentDate },
         from: { milesecondsDate: 0 }, // You can change the initial value
-        config: { duration: (duration / resources.length) }, // Duration in milliseconds (2 seconds in this example)
+        config: { duration: (duration / resources.length) * 1000 }, 
 
     });
 
@@ -114,7 +115,7 @@ function Timeline() {
                 setSliderValue((prevValue) =>
                     prevValue + 1 <= resources.length ? prevValue + 1 : resources.length
                 );
-            }, (duration / resources.length) * 1000); // Update the slider value every 100ms (adjust as needed)
+            }, (duration / resources.length) * 1000); 
         } else {
             if (isPlaying) {
                 togglePlayPause()
@@ -170,6 +171,8 @@ function Timeline() {
                 >
                     <Stack >
                         <Slider
+
+                            valueLabelDisplay="test"
                             marks
                             max={resources.length}
                             sx={{
