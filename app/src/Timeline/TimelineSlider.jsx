@@ -113,7 +113,6 @@ export default function TimelineSlider({ resources, timeMedia, setTimeMedia }) {
             timeMedia.scored_by = currentResource.totalVotes
             setTimeMedia({ ...timeMedia })
             setCurrentDate(new Date(currentResource.archiveDate).getTime())
-            console.log(currentResource)
         }
 
     }, [sliderValue])

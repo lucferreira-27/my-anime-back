@@ -17,6 +17,10 @@
     "@mui/material": "^5.14.7",
     "axios": "^1.5.0",
     "date-fns": "^2.30.0",
+    "dom-to-image": "^2.6.0",
+    "gif.js": "^0.2.0",
+    "gifshot": "^0.4.5",
+    "jsgif": "^1.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-spring": "^9.7.2"

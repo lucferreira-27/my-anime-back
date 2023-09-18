@@ -1,11 +1,12 @@
-import React, { useState, useContext } from 'react';
-import { VictoryChart, VictoryLine, VictoryAxis, VictoryZoomContainer } from 'victory';
-import { Container, Divider, Paper, Box,Grid } from '@mui/material';
+import React, { useState, useContext, useEffect, useRef } from 'react';
+import { Container, Divider, Paper, Button, Box, Grid } from '@mui/material';
 import styled from '@mui/system/styled';
 import { Context } from "../App";
 import TimeDisplay from '../TimeDisplay';
 import TimelineSlider from './TimelineSlider';
 import MembersChart from './MembersChart'
+import { CircularProgress } from '@mui/material';
+import useGifGenerator from '../hooks/useGifGenerator';
 const StyledContainer = styled(Container)`
     margin-top: 100px;
     display: flex;
@@ -48,6 +49,31 @@ const StyledPaper = styled(Paper)`
 const Timeline = () => {
     const { resources, media } = useContext(Context);
     const [timeMedia, setTimeMedia] = useState({ ...media });
+    const timeDisplayRef = useRef(null);
+    const { isGenerating, createGif } = useGifGenerator(timeDisplayRef, resources, setTimeMedia);
+
+    const convertToCSV = (data) => {
+        const replacer = (key, value) => value === null ? '' : value;
+        const header = Object.keys(data[0]);
+        const csv = [
+            header.join(','),
+            ...data.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
+        ].join('\r\n');
+        return csv;
+    };
+
+    const downloadData = () => {
+        const csvData = convertToCSV(resources);
+        const blob = new Blob([csvData], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'resources.csv';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
 
     return (
         <StyledContainer>
@@ -59,10 +85,24 @@ const Timeline = () => {
                 <StyledPaper>
                     <Grid container spacing={3}>
                         <Grid item xs={12} md={6}>
-                            <TimeDisplay timeMedia={timeMedia} />
+                            <Box>
+                                <TimeDisplay ref={timeDisplayRef} timeMedia={timeMedia} />
+                                {!isGenerating ?
+                                    <Button sx={{
+                                        margin: `20px`
+                                    }} variant={'contained'} onClick={() => createGif()}>Download GIF</Button>
+                                    :
+                                    <CircularProgress />}
+
+                            </Box>
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            <MembersChart resources={resources}/>
+                            <Box>
+                                <MembersChart resources={resources} />
+                                <Button sx={{
+                                    margin: `20px`
+                                }} variant={'contained'} onClick={() => downloadData()}>Download</Button>
+                            </Box>
                         </Grid>
                     </Grid>
                 </StyledPaper>

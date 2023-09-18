@@ -4,10 +4,10 @@ import { createContainer, VictoryChart, VictoryLine, VictoryAxis, VictoryVoronoi
 export default function MembersChart({ resources }) {
     const VictoryZoomVoronoiContainer = createContainer("zoom", "voronoi");
 
-    const [zoomDomain, setZoomDomain] = useState({ x: [0, 10] });
+    const [zoomDomain, setZoomDomain] = useState({ x:[0,resources.length || 10] });
 
     const handleZoom = (domain) => {
-        console.log(domain.x[1] - domain.x[0], domain)
+        console.log(domain)
         setZoomDomain(domain);
     };
 
@@ -23,6 +23,9 @@ export default function MembersChart({ resources }) {
 
     const calculateTickFormatCondition = (index) => {
         // This is a placeholder condition; adjust based on your needs.
+        if(!zoomDomain.x){
+            return true
+        }
         const zoomRange = zoomDomain.x[1] - zoomDomain.x[0];
         if (zoomRange > 5) {
             return index % 3 === 0;

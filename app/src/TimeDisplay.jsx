@@ -63,8 +63,7 @@ const OutsideBox = styled(Box)(({ theme }) => ({
     },
 }));
 
-
-export default function TimeDisplay({ timeMedia }) {
+const TimeDisplay = React.forwardRef(({ timeMedia },ref) => {
     const formatDate = (originalDate) => {
         return new Date(originalDate).toLocaleDateString("en-US", {
             year: "numeric",
@@ -78,7 +77,7 @@ export default function TimeDisplay({ timeMedia }) {
             flexDirection: 'row',
             alignItems: 'left',
             justifyContent: 'left', // Center vertically and horizontally
-        }}>
+        }} ref={ref}>
 
             <DisplayBox>
                 <Background>
@@ -103,4 +102,7 @@ export default function TimeDisplay({ timeMedia }) {
         </OutsideBox>
 
     );
-}
+})
+
+export default TimeDisplay;
+
