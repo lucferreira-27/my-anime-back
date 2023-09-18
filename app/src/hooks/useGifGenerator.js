@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import GIF from 'gif.js';
 import domtoimage from 'dom-to-image';
 
-const useGifGenerator = (timeDisplayRef, resources, setTimeMedia, filename = 'timeline.gif') => {
+const useGifGenerator = (config,timeDisplayRef, resources, setTimeMedia, filename = 'timeline') => {
     const [isGenerating, setIsGenerating] = useState(false);
-
+    useEffect(() => {
+        console.log(config)
+    }, [config])
     const dataURLtoBlob = (dataUrl) => {
         const arr = dataUrl.split(',');
         const mime = arr[0].match(/:(.*?);/)[1];
@@ -16,23 +18,23 @@ const useGifGenerator = (timeDisplayRef, resources, setTimeMedia, filename = 'ti
         }
         return new Blob([u8arr], { type: mime });
     }
-    
-    const convertFramesToGif = async (frames) => {
 
+    const convertFramesToGif = async (frames) => {
+        console.log(config)
         const gif = new GIF({
             workers: 2,
             workerScript: '/gif.worker.js', // Directly reference the file from the public directory
-            quality: 1, 
-            dither: false
+            quality: config.quality,
+            dither: config.dither
         });
-    
+
         for (let frame of frames) {
             const img = new Image();
             img.src = frame;
             await new Promise(r => img.onload = r);
-            gif.addFrame(img, { delay: 500 });
+            gif.addFrame(img, { delay: config.delay });
         }
-    
+
         return new Promise((resolve, reject) => {
             gif.on('finished', blob => {
                 resolve(blob);
@@ -40,6 +42,13 @@ const useGifGenerator = (timeDisplayRef, resources, setTimeMedia, filename = 'ti
             gif.render();
         });
     };
+    const formatFileName = (filename) => {
+        const cleanFile = filename
+            .replace(/[^a-zA-Z0-9\s\.\-]/g, '')  // Remove illegal characters
+            .replace(/\s+/g, '_')                // Replace spaces with underscores
+            .toLowerCase();                      // Convert to lowercase
+        return cleanFile + '.gif';
+    }
 
     const createGif = useCallback(async () => {
         try {
@@ -71,7 +80,7 @@ const useGifGenerator = (timeDisplayRef, resources, setTimeMedia, filename = 'ti
 
             const a = document.createElement('a');
             a.href = gifUrl;
-            a.download = filename;
+            a.download = formatFileName(filename)
             a.click();
 
             setIsGenerating(false);
@@ -79,9 +88,9 @@ const useGifGenerator = (timeDisplayRef, resources, setTimeMedia, filename = 'ti
             console.error(error);
             setIsGenerating(false);
         }
-    }, [timeDisplayRef, resources, setTimeMedia]);
+    }, [timeDisplayRef, resources, setTimeMedia,config]);
 
-    return { isGenerating, createGif };
+    return { isGenerating, createGif, };
 };
 
 export default useGifGenerator

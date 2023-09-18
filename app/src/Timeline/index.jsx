@@ -5,6 +5,7 @@ import { Context } from "../App";
 import TimeDisplay from '../TimeDisplay';
 import TimelineSlider from './TimelineSlider';
 import MembersChart from './MembersChart'
+import ConvertGif from '../ConvertGif'
 import { CircularProgress } from '@mui/material';
 import useGifGenerator from '../hooks/useGifGenerator';
 const StyledContainer = styled(Container)`
@@ -50,7 +51,6 @@ const Timeline = () => {
     const { resources, media } = useContext(Context);
     const [timeMedia, setTimeMedia] = useState({ ...media });
     const timeDisplayRef = useRef(null);
-    const { isGenerating, createGif } = useGifGenerator(timeDisplayRef, resources, setTimeMedia);
 
     const convertToCSV = (data) => {
         const replacer = (key, value) => value === null ? '' : value;
@@ -87,13 +87,7 @@ const Timeline = () => {
                         <Grid item xs={12} md={6}>
                             <Box>
                                 <TimeDisplay ref={timeDisplayRef} timeMedia={timeMedia} />
-                                {!isGenerating ?
-                                    <Button sx={{
-                                        margin: `20px`
-                                    }} variant={'contained'} onClick={() => createGif()}>Download GIF</Button>
-                                    :
-                                    <CircularProgress />}
-
+                                <ConvertGif timeDisplayRef={timeDisplayRef} resources={resources} setTimeMedia={setTimeMedia} timeMedia={timeMedia} />
                             </Box>
                         </Grid>
                         <Grid item xs={12} md={6}>
