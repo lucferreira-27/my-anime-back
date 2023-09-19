@@ -1,14 +1,11 @@
 package com.lucferreira.myanimeback.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lucferreira.myanimeback.exception.WaybackTimestampParseException;
 import com.lucferreira.myanimeback.service.wayback.*;
-import com.lucferreira.myanimeback.util.Regex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service

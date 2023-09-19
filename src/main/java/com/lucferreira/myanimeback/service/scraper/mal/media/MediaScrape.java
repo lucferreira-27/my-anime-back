@@ -6,7 +6,6 @@ import com.lucferreira.myanimeback.model.Record;
 import com.lucferreira.myanimeback.service.scraper.DocElement;
 import com.lucferreira.myanimeback.service.scraper.PageScraper;
 import com.lucferreira.myanimeback.service.scraper.ScrapeHelper;
-import com.lucferreira.myanimeback.service.scraper.mal.top.TopListAnchors;
 import com.lucferreira.myanimeback.util.DateParse;
 import com.lucferreira.myanimeback.util.ParseNumber;
 import com.lucferreira.myanimeback.util.Regex;
@@ -15,9 +14,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;

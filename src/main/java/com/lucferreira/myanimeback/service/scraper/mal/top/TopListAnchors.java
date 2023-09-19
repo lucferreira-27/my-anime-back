@@ -1,7 +1,6 @@
 package com.lucferreira.myanimeback.service.scraper.mal.top;
 
 import com.lucferreira.myanimeback.service.scraper.DocSelector;
-import com.lucferreira.myanimeback.service.scraper.TextSelector;
 
 import java.util.List;
 

@@ -2,7 +2,6 @@ package com.lucferreira.myanimeback.service.wayback;
 
 import com.lucferreira.myanimeback.exception.WaybackTimestampParseException;
 
-import java.text.ParseException;
 
 public class ResponseSnapshot {
     private String url;

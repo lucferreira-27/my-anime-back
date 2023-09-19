@@ -1,6 +1,5 @@
 package com.lucferreira.myanimeback.service.scraper;
 
-import java.util.List;
 
 public class DocSelector {
     private String selector;

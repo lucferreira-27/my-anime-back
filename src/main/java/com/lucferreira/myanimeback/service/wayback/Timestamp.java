@@ -1,13 +1,10 @@
 package com.lucferreira.myanimeback.service.wayback;
 
-import com.lucferreira.myanimeback.exception.WaybackException;
 import com.lucferreira.myanimeback.exception.WaybackTimestampParseException;
 import com.lucferreira.myanimeback.util.Regex;
 
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 
@@ -58,25 +55,6 @@ public class Timestamp {
 
     public Date getDate(){
         return this.date;
-    }
-    private Date increaseDateByYear(int years){
-        Calendar c = Calendar.getInstance();
-        c.setTime(this.date);
-        c.add(Calendar.YEAR, years);
-        return c.getTime();
-    }
-    private Date increaseDateByMonth(int months){
-        Calendar c = Calendar.getInstance();
-        c.setTime(this.date);
-        c.add(Calendar.MONTH, months);
-        return c.getTime();
-    }
-
-    private Date increaseDateByDay(int days){
-        Calendar c = Calendar.getInstance();
-        c.setTime(this.date);
-        c.add(Calendar.DATE, days);
-        return c.getTime();
     }
 
     public String getOriginalValue() {

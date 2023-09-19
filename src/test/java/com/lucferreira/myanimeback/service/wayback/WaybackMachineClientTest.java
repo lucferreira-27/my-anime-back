@@ -1,7 +1,6 @@
 package com.lucferreira.myanimeback.service.wayback;
 
 import com.lucferreira.myanimeback.exception.WaybackException;
-import com.lucferreira.myanimeback.exception.WaybackUnavailableException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -94,17 +93,6 @@ class WaybackMachineClientTest {
     }
 
 
-    // Helper methods
-    private ArrayList<ArrayList<String>> createSampleResponseBody() {
-        ArrayList<ArrayList<String>> body = new ArrayList<>();
-        ArrayList<String> keys = new ArrayList<>(Arrays.asList("timestamp", "original", "statuscode"));
-        ArrayList<String> snapshot1 = new ArrayList<>(Arrays.asList("20220115", "https://example.com", "200"));
-        ArrayList<String> snapshot2 = new ArrayList<>(Arrays.asList("20220315", "https://example.com", "200"));
-        body.add(keys);
-        body.add(snapshot1);
-        body.add(snapshot2);
-        return body;
-    }
 
     private List<ResponseSnapshot> createSampleResponseSnapshots() {
         List<ResponseSnapshot> responseSnapshots = new ArrayList<>();

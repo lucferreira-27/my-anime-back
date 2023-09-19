@@ -40,7 +40,6 @@ public class AnchorHandler {
     }
 
     private Optional<String> getResult(Element element, ListElementID listElementID, TopListAnchors anchor) throws SelectorQueryException {
-        Document doc = listElementID.doc();
         Optional<DocElement> optional = queryAnchorElements(listElementID, element, anchor.getSelectors());
         if (optional.isEmpty()) {
             return Optional.empty();
@@ -88,10 +87,7 @@ public class AnchorHandler {
     private Optional<DocElement> queryAnchorElements(ListElementID listElementID, Element element, List<DocSelector> docSelectors) throws SelectorQueryException {
         return scrapeHelper.queryElements(listElementID, element, docSelectors);
     }
-    private Optional<DocElement> queryNextAnchorElements(Document doc, Element element, List<DocSelector> docSelectors, int nextFrom) throws SelectorQueryException {
-        List<DocSelector> splitDocSelectors = docSelectors.subList(0,nextFrom);
-        return scrapeHelper.queryElements(doc, element, splitDocSelectors);
-    }
+    
     private Optional<String> handleAnchor(TopListAnchors anchor, DocElement docElement, ListElementID listElementID) {
         Document doc = listElementID.doc();
         final Elements selectElements = docElement.elements();

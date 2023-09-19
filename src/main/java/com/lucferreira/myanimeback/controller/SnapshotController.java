@@ -1,7 +1,6 @@
 package com.lucferreira.myanimeback.controller;
 
 import com.lucferreira.myanimeback.exception.WaybackException;
-import com.lucferreira.myanimeback.service.ScrapeService;
 import com.lucferreira.myanimeback.service.WaybackService;
 import com.lucferreira.myanimeback.service.wayback.ResponseSnapshot;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,8 +24,6 @@ public class SnapshotController {
 
     @Autowired
     private WaybackService waybackService;
-    @Autowired
-    private ScrapeService scrapeService;
 
     @Operation(summary = "Get snapshots from Wayback Machine")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved snapshots",

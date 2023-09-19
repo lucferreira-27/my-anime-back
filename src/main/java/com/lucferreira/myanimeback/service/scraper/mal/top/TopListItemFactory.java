@@ -5,7 +5,6 @@ import com.lucferreira.myanimeback.exception.ScrapeParseError;
 import com.lucferreira.myanimeback.exception.SelectorQueryException;
 import com.lucferreira.myanimeback.model.TopListItem;
 import com.lucferreira.myanimeback.util.ParseNumber2;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
