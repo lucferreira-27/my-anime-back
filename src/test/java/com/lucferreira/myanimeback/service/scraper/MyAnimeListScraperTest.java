@@ -3,7 +3,7 @@ package com.lucferreira.myanimeback.service.scraper;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.lucferreira.myanimeback.exception.ArchiveScraperException;
-import com.lucferreira.myanimeback.model.Record;
+import com.lucferreira.myanimeback.model.record.MediaRecord;
 import com.lucferreira.myanimeback.service.scraper.mal.media.MediaScrape;
 import com.lucferreira.myanimeback.service.scraper.mal.MyAnimeListScraper;
 import com.lucferreira.myanimeback.service.scraper.mal.top.TopScrape;
@@ -20,7 +20,7 @@ class MyAnimeListScraperTest {
     @Test
     void mediaScrape_ReturnsRecord_WhenValidUrlProvided() throws ArchiveScraperException {
         String url = "https://myanimelist.net/anime/5114/Fullmetal_Alchemist__Brotherhood";
-        Record record = scraper.mediaScrape(url);
+        MediaRecord record = scraper.mediaScrape(url);
         assertNotNull(record);
         assertEquals(url, record.getArchiveUrl());
         assertNotNull(record.getMembers());

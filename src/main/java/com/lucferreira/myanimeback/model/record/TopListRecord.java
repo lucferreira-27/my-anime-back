@@ -1,17 +1,17 @@
-package com.lucferreira.myanimeback.model;
+package com.lucferreira.myanimeback.model.record;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.util.*;
 
-public class TopList {
+public class TopListRecord {
     private final List<TopListItem> recordList = new ArrayList<>();
     private TopType topType;
     private TopSubtype topSubtype;
 
     private String archiveUrl;
     private Date archiveDate;
-    public TopList(TopType topType, TopSubtype topSubtype, String archiveUrl,Date archiveDate){
+    public TopListRecord(TopType topType, TopSubtype topSubtype, String archiveUrl,Date archiveDate){
         this.topType = topType;
         this.topSubtype = topSubtype;
         this.archiveUrl = archiveUrl;

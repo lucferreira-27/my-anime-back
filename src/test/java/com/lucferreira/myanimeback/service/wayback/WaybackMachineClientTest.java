@@ -1,6 +1,9 @@
 package com.lucferreira.myanimeback.service.wayback;
 
 import com.lucferreira.myanimeback.exception.WaybackException;
+import com.lucferreira.myanimeback.model.media.Media;
+import com.lucferreira.myanimeback.model.snapshot.ResponseSnapshot;
+
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -10,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class WaybackMachineClientTest {
@@ -28,10 +32,10 @@ class WaybackMachineClientTest {
         // Arrange
         String url = "https://example.com";
         WaybackMachineClient waybackMachineClientSpy = spy(waybackMachineClient);
-        doReturn(Optional.of(createSampleResponseSnapshots())).when(snapshotFetcherSpy).getTimeMap(anyString());
+        doReturn(Optional.of(createSampleResponseSnapshots())).when(snapshotFetcherSpy).getTimeMap(anyString(),1L);
 
         // Act
-        List<ResponseSnapshot> result = waybackMachineClientSpy.getSnapshotList(url);
+        List<ResponseSnapshot> result = waybackMachineClientSpy.getSnapshotList(new Media());
 
         // Assert
         assertEquals(2, result.size());
@@ -42,10 +46,10 @@ class WaybackMachineClientTest {
         // Arrange
         String url = "https://example.com";
         WaybackMachineClient waybackMachineClientSpy = spy(waybackMachineClient);
-        doReturn(Optional.empty()).when(snapshotFetcherSpy).getTimeMap(anyString());
+        doReturn(Optional.empty()).when(snapshotFetcherSpy).getTimeMap(anyString(), 1L);
 
         // Act and Assert
-        assertThrows(WaybackException.class, () -> waybackMachineClientSpy.getSnapshotList(url));
+        assertThrows(WaybackException.class, () -> waybackMachineClientSpy.getSnapshotList(new Media()));
     }
 
     @ParameterizedTest
@@ -57,10 +61,10 @@ class WaybackMachineClientTest {
         // Arrange
         String url = "https://example.com";
         WaybackMachineClient waybackMachineClientSpy = spy(waybackMachineClient);
-        doReturn(Optional.of(createSampleResponseSnapshots())).when(snapshotFetcherSpy).getTimeMap(anyString());
+        doReturn(Optional.of(createSampleResponseSnapshots())).when(snapshotFetcherSpy).getTimeMap(anyString(),1L);
 
         // Act
-        List<ResponseSnapshot> result = waybackMachineClientSpy.getSnapshotsInRange(url, beginTimestamp, Optional.of(endTimestamp));
+        List<ResponseSnapshot> result = waybackMachineClientSpy.getSnapshotsInRange(new Media(), beginTimestamp, Optional.of(endTimestamp));
 
         // Assert
         assertEquals(expectedSize, result.size());
@@ -72,10 +76,10 @@ class WaybackMachineClientTest {
         // Arrange
         String url = "https://example.com";
         WaybackMachineClient waybackMachineClientSpy = spy(waybackMachineClient);
-        doReturn(Optional.empty()).when(snapshotFetcherSpy).getTimeMap(anyString());
+        doReturn(Optional.empty()).when(snapshotFetcherSpy).getTimeMap(anyString(),1L);
 
         // Act and Assert
-        assertThrows(WaybackException.class, () -> waybackMachineClientSpy.getSnapshotsInRange(url, "20220101", Optional.of("20220401")));
+        assertThrows(WaybackException.class, () -> waybackMachineClientSpy.getSnapshotsInRange(new Media(), "20220101", Optional.of("20220401")));
     }
     @ParameterizedTest
     @CsvSource({
@@ -85,9 +89,9 @@ class WaybackMachineClientTest {
         // Arrange
         String url = "https://example.com";
         WaybackMachineClient waybackMachineClientSpy = spy(waybackMachineClient);
-        doReturn(Optional.of(createSampleResponseSnapshots())).when(snapshotFetcherSpy).getTimeMap(anyString());
+        doReturn(Optional.of(createSampleResponseSnapshots())).when(snapshotFetcherSpy).getTimeMap(anyString(),1L);
         // Act and Assert
-        WaybackException exception = assertThrows(WaybackException.class, () -> waybackMachineClientSpy.getSnapshotsInRange(url, beginTimestamp, Optional.of(endTimestamp)));
+        WaybackException exception = assertThrows(WaybackException.class, () -> waybackMachineClientSpy.getSnapshotsInRange(new Media(), beginTimestamp, Optional.of(endTimestamp)));
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         assertTrue(exception.getMessage().contains("No snapshots found for the URL within the specified time range: " + url));
     }
@@ -96,8 +100,8 @@ class WaybackMachineClientTest {
 
     private List<ResponseSnapshot> createSampleResponseSnapshots() {
         List<ResponseSnapshot> responseSnapshots = new ArrayList<>();
-        responseSnapshots.add(new ResponseSnapshot("https://web.archive.org/web/20220115/https://example.com", "20220115000000", "200"));
-        responseSnapshots.add(new ResponseSnapshot("https://web.archive.org/web/20220315/https://example.com", "20220315000000", "200"));
+        responseSnapshots.add(new ResponseSnapshot("https://web.archive.org/web/20220115/https://example.com", "20220115000000", "200",1L));
+        responseSnapshots.add(new ResponseSnapshot("https://web.archive.org/web/20220315/https://example.com", "20220315000000", "200",1L));
         return responseSnapshots;
     }
 }

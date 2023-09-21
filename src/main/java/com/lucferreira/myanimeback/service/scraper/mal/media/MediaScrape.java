@@ -2,7 +2,7 @@ package com.lucferreira.myanimeback.service.scraper.mal.media;
 
 import com.lucferreira.myanimeback.exception.ArchiveScraperException;
 import com.lucferreira.myanimeback.exception.SelectorQueryException;
-import com.lucferreira.myanimeback.model.Record;
+import com.lucferreira.myanimeback.model.record.MediaRecord;
 import com.lucferreira.myanimeback.service.scraper.DocElement;
 import com.lucferreira.myanimeback.service.scraper.PageScraper;
 import com.lucferreira.myanimeback.service.scraper.ScrapeHelper;
@@ -19,14 +19,14 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-public class MediaScrape extends PageScraper<Record> {
+public class MediaScrape extends PageScraper<MediaRecord> {
 
     @Autowired
     public MediaScrape(ScrapeHelper scrapeHelper) {
         super(scrapeHelper);
     }
 
-    public Record scrape(String url) throws ArchiveScraperException {
+    public MediaRecord scrape(String url) throws ArchiveScraperException {
         Connection.Response response = scrapeHelper.connectToUrl(url);
         String documentUrl = response.url().toString();
         String datePart = Regex.match(documentUrl, "\\d{14}");
@@ -39,7 +39,7 @@ public class MediaScrape extends PageScraper<Record> {
         Elements elements = docElement.elements();
         Map<MediaAnchors, String> parseTextMap = getParseTexts(elements, doc);
 
-        return new Record.Builder()
+        return new MediaRecord.Builder()
                 .archiveUrl(documentUrl)
                 .members(ParseNumber.getIntValue(MediaAnchors.MEDIA_MEMBERS, parseTextMap))
                 .scoreValue(ParseNumber.getDoubleValue(MediaAnchors.MEDIA_SCORE_VALUE, parseTextMap))

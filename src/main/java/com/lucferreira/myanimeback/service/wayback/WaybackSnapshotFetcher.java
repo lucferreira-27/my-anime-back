@@ -2,6 +2,10 @@ package com.lucferreira.myanimeback.service.wayback;
 
 import com.lucferreira.myanimeback.exception.WaybackException;
 import com.lucferreira.myanimeback.exception.WaybackUnavailableException;
+import com.lucferreira.myanimeback.model.media.Media;
+import com.lucferreira.myanimeback.model.snapshot.ResponseSnapshot;
+import com.lucferreira.myanimeback.model.snapshot.Timestamp;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +23,7 @@ public class WaybackSnapshotFetcher {
     public WaybackSnapshotFetcher(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
-    public Optional<List<ResponseSnapshot>> getTimeMap(String url) throws WaybackException {
+    public Optional<List<ResponseSnapshot>> getTimeMap(String url, Long malId) throws WaybackException {
         String endpoint = TIME_MAP_URL + url;
         ArrayList<ArrayList<String>> body = fetchSnapshotBody(endpoint);
 
@@ -29,12 +33,12 @@ public class WaybackSnapshotFetcher {
 
         List<String> keys = body.get(0);
         List<Map<String, String>> snapshotList = createSnapshotList(body, keys);
-        List<ResponseSnapshot> responseSnapshots = convertToResponseSnapshots(snapshotList);
+        List<ResponseSnapshot> responseSnapshots = convertToResponseSnapshots(snapshotList,malId);
 
         return Optional.of(responseSnapshots);
     }
-    public Optional<ResponseSnapshot> getTimeMap(String url, String targetTimestamp) {
-        Optional<List<ResponseSnapshot>> optional = getTimeMap(url);
+    public Optional<ResponseSnapshot> getTimeMap(String url, String targetTimestamp, Long malId) {
+        Optional<List<ResponseSnapshot>> optional = getTimeMap(url,malId);
         if (optional.isEmpty()) {
             return Optional.empty();
         }
@@ -67,14 +71,14 @@ public class WaybackSnapshotFetcher {
         }
         return snapshot;
     }
-    private List<ResponseSnapshot> convertToResponseSnapshots(List<Map<String, String>> snapshotList) {
+    private List<ResponseSnapshot> convertToResponseSnapshots(List<Map<String, String>> snapshotList, Long malId) {
         List<ResponseSnapshot> responseSnapshots = new ArrayList<>();
         for (Map<String, String> snapshot : snapshotList) {
             String timestamp = snapshot.get("timestamp");
             String original = snapshot.get("original");
             String statusCode = snapshot.get("statuscode");
             String snapshotUrl = String.format("https://web.archive.org/web/%s/%s", timestamp, original);
-            ResponseSnapshot responseSnapshot = new ResponseSnapshot(snapshotUrl, timestamp, statusCode);
+            ResponseSnapshot responseSnapshot = new ResponseSnapshot(snapshotUrl, timestamp, statusCode,malId);
             responseSnapshots.add(responseSnapshot);
         }
         return responseSnapshots;

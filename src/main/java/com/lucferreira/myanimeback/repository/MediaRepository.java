@@ -10,4 +10,5 @@ public interface MediaRepository extends JpaRepository<Media, Long> {
     // Retrieve a media by its type and ID
     Optional<Media> findByTypeAndId(String type, Long id);
     List<Media> findAllByType(String type);
+    Optional<Media> findByMyanimelistUrl(String myanimelistUrl);
 }

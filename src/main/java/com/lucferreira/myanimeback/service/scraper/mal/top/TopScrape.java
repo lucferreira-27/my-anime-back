@@ -3,8 +3,8 @@ package com.lucferreira.myanimeback.service.scraper.mal.top;
 import com.lucferreira.myanimeback.exception.ArchiveScraperException;
 import com.lucferreira.myanimeback.exception.ScrapeParseError;
 import com.lucferreira.myanimeback.exception.SelectorQueryException;
-import com.lucferreira.myanimeback.model.TopList;
-import com.lucferreira.myanimeback.model.TopListItem;
+import com.lucferreira.myanimeback.model.record.TopListItem;
+import com.lucferreira.myanimeback.model.record.TopListRecord;
 import com.lucferreira.myanimeback.service.scraper.DocElement;
 import com.lucferreira.myanimeback.service.scraper.PageScraper;
 import com.lucferreira.myanimeback.service.scraper.ScrapeHelper;
@@ -19,7 +19,7 @@ import javax.print.Doc;
 import java.util.*;
 
 @Service
-public class TopScrape extends PageScraper<TopList> {
+public class TopScrape extends PageScraper<TopListRecord> {
 
 
     private final TopListItemFactory topListItemFactory;
@@ -31,7 +31,7 @@ public class TopScrape extends PageScraper<TopList> {
         this.topListFactory = topListFactory;
     }
 
-    public TopList scrape(String url) throws ArchiveScraperException{
+    public TopListRecord scrape(String url) throws ArchiveScraperException{
         Connection.Response response = scrapeHelper.connectToUrl(url);
         Document doc = scrapeHelper.jsoupParse(response);
 
@@ -41,15 +41,15 @@ public class TopScrape extends PageScraper<TopList> {
         Elements elements = docElement.elements();
         ListElementID listElementID = new ListElementID(elements,doc,docElement.docSelector().getId());
 
-        TopList topList = processElements(listElementID, doc);
+        TopListRecord topList = processElements(listElementID, doc);
 
         return topList;
     }
 
-    private TopList processElements(ListElementID listElementID, Document doc) throws ArchiveScraperException {
+    private TopListRecord processElements(ListElementID listElementID, Document doc) throws ArchiveScraperException {
         List<TopListAnchors> topListAnchors = List.of(TopListAnchors.values());
 
-        TopList topList = topListFactory.createTopList(doc.baseUri());
+        TopListRecord topList = topListFactory.createTopList(doc.baseUri());
         for (Element element: listElementID.elements()) {
             TopListItem topListItem =  topListItemFactory.processAnchors(element, listElementID, topListAnchors);
             topList.addTopListItemToMap(topListItem);

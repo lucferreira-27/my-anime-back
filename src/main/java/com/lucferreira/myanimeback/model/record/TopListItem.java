@@ -1,4 +1,4 @@
-package com.lucferreira.myanimeback.model;
+package com.lucferreira.myanimeback.model.record;
 
 public class TopListItem {
     private final String title;

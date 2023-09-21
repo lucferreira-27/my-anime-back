@@ -1,10 +1,23 @@
-package com.lucferreira.myanimeback.model;
+package com.lucferreira.myanimeback.model.record;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lucferreira.myanimeback.model.media.Media;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.util.Date;
 
-public class Record {
+@Entity
+public class MediaRecord {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private Double scoreValue;
     private Integer totalVotes;
     private Integer popularity;
@@ -12,8 +25,31 @@ public class Record {
     private Integer ranked;
     private Integer favorites;
     private String archiveUrl;
-
     private Date archiveDate;
+
+    @ManyToOne
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    private Media media;
+    
+
+
+    public MediaRecord() {
+
+    }
+
+    private MediaRecord(Double scoreValue, Integer totalVotes, Integer popularity, Integer ranked, Integer members,
+            Integer favorites, String archiveUrl, Date archiveDate, Media media) {
+        this.scoreValue = scoreValue;
+        this.totalVotes = totalVotes;
+        this.popularity = popularity;
+        this.members = members;
+        this.favorites = favorites;
+        this.archiveUrl = archiveUrl;
+        this.ranked = ranked;
+        this.archiveDate = archiveDate;
+        this.media = media;
+    }
 
     public Double getScoreValue() {
         return scoreValue;
@@ -72,20 +108,16 @@ public class Record {
     }
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-
     public Date getArchiveDate() {
         return archiveDate;
     }
 
-    private Record(Double scoreValue, Integer totalVotes, Integer popularity, Integer ranked , Integer members, Integer favorites, String archiveUrl, Date archiveDate) {
-        this.scoreValue = scoreValue;
-        this.totalVotes = totalVotes;
-        this.popularity = popularity;
-        this.members = members;
-        this.favorites = favorites;
-        this.archiveUrl = archiveUrl;
-        this.ranked = ranked;
-        this.archiveDate = archiveDate;
+    public Media getMedia() {
+        return media;
+    }
+
+    public void setMedia(Media media) {
+        this.media = media;
     }
 
     public static class Builder {
@@ -97,6 +129,8 @@ public class Record {
         private Integer ranked;
         private String archiveUrl;
         private Date archiveDate;
+        private Media media;
+
         public Builder scoreValue(Double scoreValue) {
             this.scoreValue = scoreValue;
             return this;
@@ -111,10 +145,12 @@ public class Record {
             this.popularity = popularity;
             return this;
         }
+
         public Builder ranked(Integer ranked) {
             this.ranked = ranked;
             return this;
         }
+
         public Builder members(Integer members) {
             this.members = members;
             return this;
@@ -129,12 +165,21 @@ public class Record {
             this.archiveUrl = archiveUrl;
             return this;
         }
+
         public Builder archiveDate(Date archiveDate) {
             this.archiveDate = archiveDate;
             return this;
         }
-        public Record build() {
-            return new Record(scoreValue, totalVotes, popularity, ranked,members, favorites, archiveUrl,archiveDate);
+
+        public Builder media(Media media) {
+            this.media = media;
+            return this;
+        }
+
+        public MediaRecord build() {
+            return new MediaRecord(scoreValue, totalVotes, popularity, ranked, members, favorites, archiveUrl,
+                    archiveDate,
+                    media);
         }
     }
 }

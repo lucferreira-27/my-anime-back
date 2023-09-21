@@ -1,17 +1,30 @@
-package com.lucferreira.myanimeback.service.wayback;
+package com.lucferreira.myanimeback.model.snapshot;
 
 import com.lucferreira.myanimeback.exception.WaybackTimestampParseException;
 import com.lucferreira.myanimeback.util.Regex;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
+@Entity
 public class Timestamp {
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private Date date;
     private String originalValue;
+    
+    public Timestamp(){
+        
+    }
+
     public Timestamp(String value) throws WaybackTimestampParseException {
         this.originalValue = value;
         this.date = parseDate(value);

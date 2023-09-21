@@ -6,7 +6,7 @@ public class MediaDto {
     private Long id;
     private String name;
     private int members;
-    private float score;
+    private double score;
     private int scoreCount;
     private int rankedPosition;
     private int popularityPosition;
@@ -43,11 +43,11 @@ public class MediaDto {
         this.members = members;
     }
 
-    public float getScore() {
+    public double getScore() {
         return score;
     }
 
-    public void setScore(float score) {
+    public void setScore(double score) {
         this.score = score;
     }
 
@@ -155,7 +155,7 @@ public class MediaDto {
             return this;
         }
 
-        public Builder score(float score) {
+        public Builder score(double score) {
             mediaDto.setScore(score);
             return this;
         }

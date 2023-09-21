@@ -3,7 +3,7 @@ package com.lucferreira.myanimeback.service.scraper.mal.top;
 
 import com.lucferreira.myanimeback.exception.ScrapeParseError;
 import com.lucferreira.myanimeback.exception.SelectorQueryException;
-import com.lucferreira.myanimeback.model.TopListItem;
+import com.lucferreira.myanimeback.model.record.TopListItem;
 import com.lucferreira.myanimeback.util.ParseNumber2;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;

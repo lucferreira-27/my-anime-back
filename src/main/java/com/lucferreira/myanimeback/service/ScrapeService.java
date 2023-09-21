@@ -1,8 +1,8 @@
 package com.lucferreira.myanimeback.service;
 
 import com.lucferreira.myanimeback.exception.SelectorQueryException;
-import com.lucferreira.myanimeback.model.Record;
-import com.lucferreira.myanimeback.model.TopList;
+import com.lucferreira.myanimeback.model.record.MediaRecord;
+import com.lucferreira.myanimeback.model.record.TopListRecord;
 import com.lucferreira.myanimeback.service.scraper.mal.MyAnimeListScraper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,9 +20,9 @@ public class ScrapeService {
 
 
 
-    public Record getMediaStatistics(String url){
+    public MediaRecord getMediaStatistics(String url){
         try {
-            Record record = myAnimeListScraper.mediaScrape(url);
+            MediaRecord record = myAnimeListScraper.mediaScrape(url);
             return record;
         } catch (SelectorQueryException e) {
             e.printStackTrace();
@@ -32,9 +32,9 @@ public class ScrapeService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred, please try again later.");
         }
     }
-    public TopList getTopListStatistics(String url){
+    public TopListRecord getTopListStatistics(String url){
         try {
-            TopList topList = myAnimeListScraper.topScrape(url);
+            TopListRecord topList = myAnimeListScraper.topScrape(url);
             return topList;
         } catch (SelectorQueryException e) {
             e.printStackTrace();

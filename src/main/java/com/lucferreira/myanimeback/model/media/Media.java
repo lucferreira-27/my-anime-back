@@ -1,14 +1,13 @@
 package com.lucferreira.myanimeback.model.media;
-
-
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-
+import jakarta.persistence.OneToMany;
 import java.util.Date;
+import java.util.List;
 
+import com.lucferreira.myanimeback.model.record.MediaRecord;
 @Entity
 public class Media  {
     @Id
@@ -16,7 +15,7 @@ public class Media  {
     private Long id;
     private String name;
     private int members;
-    private float score;
+    private double score;
     private int scoreCount;
     private int rankedPosition;
     private int popularityPosition;
@@ -27,11 +26,14 @@ public class Media  {
     private Date startDate;
     private Date endDate;
     private String status;
+    private Long malId;
+    @OneToMany
+    private List<MediaRecord> records;
 
     public Media(){
 
     }
-    public Media(Long id, String name, int members, float score, int scoreCount, int rankedPosition, int popularityPosition, int favoritesCount, String imageUrl, String myanimelistUrl, String type, Date startDate, Date endDate, String status, String mediaType) {
+    public Media(Long id, String name, int members, double score, int scoreCount, int rankedPosition, int popularityPosition, int favoritesCount, String imageUrl, String myanimelistUrl, String type, Date startDate, Date endDate, String status, String mediaType, Long malId) {
         this.id = id;
         this.name = name;
         this.members = members;
@@ -47,6 +49,7 @@ public class Media  {
         this.endDate = endDate;
         this.status = status;
         this.mediaType = mediaType;
+        this.malId = malId;
     }
 
     private String mediaType;
@@ -65,6 +68,7 @@ public class Media  {
                 .imageUrl(mediaForm.getImageUrl())
                 .myanimelistUrl(mediaForm.getMyanimelistUrl())
                 .type(mediaForm.getType())
+                .malId(mediaForm.getMalId())
                 .startDate(mediaForm.getStartDate())
                 .endDate(mediaForm.getEndDate())
                 .status(mediaForm.getStatus())
@@ -83,6 +87,7 @@ public class Media  {
                 .favoritesCount(mediaForm.getFavoritesCount())
                 .imageUrl(mediaForm.getImageUrl())
                 .myanimelistUrl(mediaForm.getMyanimelistUrl())
+                .malId(mediaForm.getMalId())
                 .type(mediaForm.getType())
                 .startDate(mediaForm.getStartDate())
                 .endDate(mediaForm.getEndDate())
@@ -103,7 +108,7 @@ public class Media  {
         return members;
     }
 
-    public float getScore() {
+    public double getScore() {
         return score;
     }
 
@@ -198,7 +203,7 @@ public class Media  {
         private Long id;
         private String name;
         private int members;
-        private float score;
+        private double score;
         private int scoreCount;
         private int rankedPosition;
         private int popularityPosition;
@@ -210,9 +215,10 @@ public class Media  {
         private Date endDate;
         private String status;
         private String mediaType;
+        private Long malId;
 
         public Media build() {
-            return new Media(id, name, members, score, scoreCount, rankedPosition, popularityPosition, favoritesCount, imageUrl, myanimelistUrl, type, startDate, endDate, status, mediaType);
+            return new Media(id, name, members, score, scoreCount, rankedPosition, popularityPosition, favoritesCount, imageUrl, myanimelistUrl, type, startDate, endDate, status, mediaType,malId);
         }
 
         public Builder name(String name) {
@@ -225,7 +231,7 @@ public class Media  {
             return this;
         }
 
-        public Builder score(float score) {
+        public Builder score(double score) {
             this.score = score;
             return this;
         }
@@ -289,5 +295,14 @@ public class Media  {
             this.id = id;
             return this;
         }
+        public Builder malId(long malId){
+            this.malId = malId;
+            return this;
+
+        }
+    }
+
+    public Long getMalId() {
+        return malId;
     }
 }

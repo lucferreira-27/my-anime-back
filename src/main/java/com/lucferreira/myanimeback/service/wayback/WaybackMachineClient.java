@@ -1,6 +1,9 @@
 package com.lucferreira.myanimeback.service.wayback;
 
 import com.lucferreira.myanimeback.exception.WaybackException;
+import com.lucferreira.myanimeback.model.media.Media;
+import com.lucferreira.myanimeback.model.snapshot.ResponseSnapshot;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,25 +23,25 @@ public class WaybackMachineClient {
         this.snapshotFetcher = snapshotFetcher;
     }
 
-    public List<ResponseSnapshot> getSnapshotList(String url) throws WaybackException {
+    public List<ResponseSnapshot> getSnapshotList(Media media) throws WaybackException {
 
-        Optional<List<ResponseSnapshot>> optional = snapshotFetcher.getTimeMap(url);
+        Optional<List<ResponseSnapshot>> optional = snapshotFetcher.getTimeMap(media.getMyanimelistUrl(),media.getMalId());
         if(optional.isPresent()){
             List<ResponseSnapshot> responseSnapshots = optional.get();
             return responseSnapshots;
         }
-        throw new WaybackException(HttpStatus.NOT_FOUND, "No snapshots found for the URL: " + url);
+        throw new WaybackException(HttpStatus.NOT_FOUND, "No snapshots found for the URL: " + media.getMyanimelistUrl());
     }
 
-    public List<ResponseSnapshot> getSnapshotsInRange(String url, String beginTimestamp, Optional<String> optionalEnd) throws WaybackException {
-        Optional<List<ResponseSnapshot>> optional = snapshotFetcher.getTimeMap(url);
+    public List<ResponseSnapshot> getSnapshotsInRange(Media media, String beginTimestamp, Optional<String> optionalEnd) throws WaybackException {
+        Optional<List<ResponseSnapshot>> optional = snapshotFetcher.getTimeMap(media.getMyanimelistUrl(),media.getMalId());
         if (optional.isEmpty()) {
-            throw new WaybackException(HttpStatus.NOT_FOUND, "No snapshots found for the URL within the specified time range: " + url);
+            throw new WaybackException(HttpStatus.NOT_FOUND, "No snapshots found for the URL within the specified time range: " + media.getMyanimelistUrl());
         }
         List<ResponseSnapshot> responseSnapshots = optional.get();
         List<ResponseSnapshot> filteredSnapshots = filterSnapshots(responseSnapshots, beginTimestamp, optionalEnd);
         if (filteredSnapshots.isEmpty()) {
-            throw new WaybackException(HttpStatus.NOT_FOUND, "No snapshots found for the URL within the specified time range: " + url);
+            throw new WaybackException(HttpStatus.NOT_FOUND, "No snapshots found for the URL within the specified time range: " + media.getMyanimelistUrl());
         }
         return filteredSnapshots;
     }
