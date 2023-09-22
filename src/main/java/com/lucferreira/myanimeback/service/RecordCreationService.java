@@ -46,10 +46,6 @@ public class RecordCreationService {
                     "https://web.archive.org/web/{timestamp}*/https://myanimelist.net/{category}/{id}/{title (optional)}";
             throw new RecordException(HttpStatus.BAD_REQUEST, errorMessage);
         }
-        Optional<MediaRecord> foundRecord = recordRepository.findByArchiveUrl(url);
-        if (foundRecord.isPresent()) {
-            return foundRecord.get();
-        }
         MediaRecord record = scrapeService.getMediaStatistics(url);
         return record;
     }

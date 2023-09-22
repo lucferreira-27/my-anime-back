@@ -5,6 +5,7 @@ import com.lucferreira.myanimeback.model.snapshot.ResponseSnapshot;
 public class ArchiveResponse {
     private int total;
     private int totalAvailable;
+    private int totalUnavailable;
     private ResponseSnapshot first;
     private ResponseSnapshot last;
     private Boolean newMedia;
@@ -52,6 +53,12 @@ public class ArchiveResponse {
     }
     public void setTotalAvailable(int totalAvailable) {
         this.totalAvailable = totalAvailable;
+    }
+    public void setTotalUnavailable(int totalUnavailable) {
+        this.totalUnavailable = totalUnavailable;
+    }
+    public int getTotalUnavailable() {
+        return totalUnavailable;
     }
 
 }

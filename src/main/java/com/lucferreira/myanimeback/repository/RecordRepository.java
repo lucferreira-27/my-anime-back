@@ -23,5 +23,9 @@ public interface RecordRepository extends JpaRepository<MediaRecord, Long> {
     Optional<MediaRecord> findByArchiveDate(Date archiveDate);
 
     List<MediaRecord> findAllByMedia(Media media);
+
+    boolean existsByArchiveUrl(String url);
+
     
+
 }

@@ -9,5 +9,11 @@ public class ArchiveRequest {
     public void setUrl(String url) {
         this.url = url;
     }
+    public ArchiveRequest(){
+        
+    }
+    public ArchiveRequest(String url){
+        this.url = url;
+    }
 }
 

@@ -3,6 +3,7 @@ package com.lucferreira.myanimeback.model.record;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lucferreira.myanimeback.model.media.Media;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,6 +25,7 @@ public class MediaRecord {
     private Integer members;
     private Integer ranked;
     private Integer favorites;
+    @Column(unique = true)
     private String archiveUrl;
     private Date archiveDate;
 

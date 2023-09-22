@@ -19,6 +19,8 @@ public class ResponseSnapshot {
     @OneToOne(cascade = CascadeType.PERSIST)
     private Timestamp timestamp;
     private String snapshotStatus;
+    private Boolean available = false;
+    private Integer numberOfRequests = 0;
 
     public ResponseSnapshot() {
 
@@ -29,6 +31,18 @@ public class ResponseSnapshot {
         this.timestamp = new Timestamp(timestamp);
         this.snapshotStatus = snapshotStatus;
         this.malId = malId;
+    }
+    public Boolean getAvailable() {
+        return available;
+    }
+    public void setAvailable(Boolean available) {
+        this.available = available;
+    }
+    public Integer getNumberOfRequests() {
+        return numberOfRequests;
+    }
+    public void setNumberOfRequests(Integer numberOfRequests) {
+        this.numberOfRequests = numberOfRequests;
     }
 
     public String getUrl() {

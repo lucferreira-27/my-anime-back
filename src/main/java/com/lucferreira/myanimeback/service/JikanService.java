@@ -21,6 +21,7 @@ public class JikanService {
     public MediaForm getMediaInfo(String myanimelistUrl) throws JikanQueryException {
         // Implementation to get anime info using Jikan API
         int id = parseUrlToId(myanimelistUrl);
+        System.out.println("Id: " + id + " " + myanimelistUrl);
         if(id < 0){
             return null;
         }

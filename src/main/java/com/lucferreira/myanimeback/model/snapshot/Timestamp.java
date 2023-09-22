@@ -1,5 +1,6 @@
 package com.lucferreira.myanimeback.model.snapshot;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lucferreira.myanimeback.exception.WaybackTimestampParseException;
 import com.lucferreira.myanimeback.util.Regex;
 
@@ -65,7 +66,7 @@ public class Timestamp {
     }
 
 
-
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     public Date getDate(){
         return this.date;
     }

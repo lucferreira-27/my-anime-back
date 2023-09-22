@@ -32,7 +32,7 @@ public class WaybackService {
             responseSnapshotRepository.saveAll(archiveSnapshotlist);
             return archiveSnapshotlist;
         }
-        return getLocalSnapshotList(media.getMalId());
+        return localSnapshotList;
     }
 
     private List<ResponseSnapshot> getArchiveSnapshotList(Media media) {
@@ -46,7 +46,7 @@ public class WaybackService {
     }
 
     private List<ResponseSnapshot> getLocalSnapshotList(Long malId) {
-        return responseSnapshotRepository.findAll();
+        return responseSnapshotRepository.findAllByMalId(malId);
     }
 
     public List<ResponseSnapshot> getSnapshotByTimestamp(Media media, String timestamp) {
