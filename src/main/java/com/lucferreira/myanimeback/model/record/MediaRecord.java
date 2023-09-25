@@ -2,15 +2,20 @@ package com.lucferreira.myanimeback.model.record;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lucferreira.myanimeback.model.media.Media;
+import com.lucferreira.myanimeback.model.snapshot.ResponseSnapshot;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.util.Date;
 
@@ -33,8 +38,10 @@ public class MediaRecord {
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
     private Media media;
-    
 
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JsonManagedReference
+    private ResponseSnapshot responseSnapshot;
 
     public MediaRecord() {
 
@@ -120,6 +127,20 @@ public class MediaRecord {
 
     public void setMedia(Media media) {
         this.media = media;
+    }
+
+    public ResponseSnapshot getResponseSnapshot() {
+        return responseSnapshot;
+    }
+
+    public void setResponseSnapshot(ResponseSnapshot responseSnapshot) {
+        this.responseSnapshot = responseSnapshot;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public Long getId() {
+        return id;
     }
 
     public static class Builder {

@@ -1,5 +1,7 @@
 package com.lucferreira.myanimeback.repository;
 
+import com.lucferreira.myanimeback.model.media.Media;
+import com.lucferreira.myanimeback.model.record.MediaRecord;
 import com.lucferreira.myanimeback.model.snapshot.ResponseSnapshot;
 import com.lucferreira.myanimeback.model.snapshot.Timestamp;
 
@@ -22,9 +24,9 @@ public interface ResponseSnapshotRepository extends JpaRepository<ResponseSnapsh
     List<ResponseSnapshot> findBySnapshotStatus(String snapshotStatus);
 
     List<ResponseSnapshot> findByTimestampDateBetween(Date startDate, Date endDate);
+    List<ResponseSnapshot> findByAvailable(boolean available);
 
-    List<ResponseSnapshot> findByAvailableTrue();
+    List<ResponseSnapshot> findByAvailableAndMediaRecord_Media(boolean available, Media media);
 
-    List<ResponseSnapshot> findByAvailableFalse();
 
 }

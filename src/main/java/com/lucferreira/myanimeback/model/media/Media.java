@@ -29,6 +29,9 @@ public class Media  {
     private Long malId;
     @OneToMany
     private List<MediaRecord> records;
+    private Date lastUpdate;
+    private boolean updated;
+    private boolean busy;
 
     public Media(){
 
@@ -159,6 +162,30 @@ public class Media  {
 
     public String getMediaType() {
         return mediaType;
+    }
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+    public List<MediaRecord> getRecords() {
+        return records;
+    }
+    public void setRecords(List<MediaRecord> records) {
+        this.records = records;
+    }
+    public boolean isUpdated() {
+        return updated;
+    }
+    public void setUpdated(boolean updated) {
+        this.updated = updated;
+    }
+    public void setBusy(boolean busy) {
+        this.busy = busy;
+    }
+    public boolean isBusy() {
+        return busy;
     }
 
     public static MediaDto toDto(MediaForm mediaForm) {

@@ -8,7 +8,12 @@ import java.util.Optional;
 
 public interface MediaRepository extends JpaRepository<Media, Long> {
     // Retrieve a media by its type and ID
+
+    List<Media> findByUpdated(boolean updated);
+
     Optional<Media> findByTypeAndId(String type, Long id);
+
     List<Media> findAllByType(String type);
+
     Optional<Media> findByMyanimelistUrl(String myanimelistUrl);
 }

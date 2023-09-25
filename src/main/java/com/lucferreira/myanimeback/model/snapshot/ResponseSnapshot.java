@@ -1,6 +1,10 @@
 package com.lucferreira.myanimeback.model.snapshot;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.lucferreira.myanimeback.exception.WaybackTimestampParseException;
+import com.lucferreira.myanimeback.model.media.Media;
+import com.lucferreira.myanimeback.model.record.MediaRecord;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -21,6 +25,9 @@ public class ResponseSnapshot {
     private String snapshotStatus;
     private Boolean available = false;
     private Integer numberOfRequests = 0;
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JsonBackReference
+    private MediaRecord mediaRecord;
 
     public ResponseSnapshot() {
 
@@ -73,5 +80,11 @@ public class ResponseSnapshot {
     }
     public void setMalId(Long malId) {
         this.malId = malId;
+    }
+    public void setMediaRecord(MediaRecord mediaRecord) {
+        this.mediaRecord = mediaRecord;
+    }
+    public MediaRecord getMediaRecord() {
+        return mediaRecord;
     }
 }

@@ -26,6 +26,8 @@ public interface RecordRepository extends JpaRepository<MediaRecord, Long> {
 
     boolean existsByArchiveUrl(String url);
 
+    List<MediaRecord> findAllByMediaAndResponseSnapshot_Available(Media media,boolean available);
+
     
 
 }
