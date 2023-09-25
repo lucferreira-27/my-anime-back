@@ -37,7 +37,7 @@ public class RecordService {
     private final ResponseSnapshotRepository responseSnapshotRepository;
     private final MediaService mediaService;
     private final RecordCreationService recordCreationService;
-    private final ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(5);
+    private final ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
     private static final Logger logger = LoggerFactory.getLogger(RecordService.class);
     private final Set<String> mediaBeingProcessed = ConcurrentHashMap.newKeySet(); // Add this line
 
@@ -73,17 +73,25 @@ public class RecordService {
         logger.debug("Creating new record for media: {}", media.getName());
         MediaRecord mediaRecord = recordCreationService.getMediaRecord(snapshot.getUrl());
         if (record != null) {
-            mediaRecord.setId(record.getId());
+            record.setFavorites(mediaRecord.getFavorites());
+            record.setScoreValue(mediaRecord.getScoreValue());
+            record.setTotalVotes(mediaRecord.getTotalVotes());
+            record.setPopularity(mediaRecord.getPopularity());
+            record.setMembers(mediaRecord.getMembers());
+            record.setRanked(mediaRecord.getRanked());
+            record.setArchiveDate(mediaRecord.getArchiveDate());
+        } else {
+            record = mediaRecord;
         }
         responseSnapshotRepository.save(snapshot); // Save the snapshot first
-        mediaRecord.setMedia(media);
-        mediaRecord.setResponseSnapshot(snapshot);
-        snapshot.setMediaRecord(mediaRecord);
+        record.setMedia(media);
+        record.setResponseSnapshot(snapshot);
+        snapshot.setMediaRecord(record);
         snapshot.setAvailable(true);
         snapshot.setNumberOfRequests(snapshot.getNumberOfRequests() + 1);
-        saveMediaRecord(mediaRecord);
+        saveMediaRecord(record);
 
-        return mediaRecord;
+        return record;
     }
 
     private void createRecordsAsync(Media media, List<ResponseSnapshot> responseSnapshots) {
@@ -99,26 +107,19 @@ public class RecordService {
         logger.info("Starting async record creation for media: {} found {} snapshots", media.getName(),
                 responseSnapshots.size());
         media.setBusy(true);
-        mediaRepository.save(media);
+        // mediaRepository.save(media);
 
         List<CompletableFuture<MediaRecord>> futures = responseSnapshots.stream()
                 .filter(snapshot -> snapshot.getSnapshotStatus().startsWith("2")
                         || snapshot.getSnapshotStatus().startsWith("3"))
                 .map(snapshot -> CompletableFuture.supplyAsync(() -> {
-                    logger.info("Create Media Record");
-
                     try {
                         return getOrCreateMediaRecord(media, snapshot);
                     } catch (Exception e) {
+                        e.printStackTrace();
 
-                        MediaRecord mediaRecord = new MediaRecord();
-                        mediaRecord.setMedia(media);
-                        mediaRecord.setArchiveUrl(snapshot.getUrl());
-                        mediaRecord.setResponseSnapshot(snapshot);
-                        snapshot.setMediaRecord(mediaRecord);
                         snapshot.setAvailable(false);
                         snapshot.setNumberOfRequests(snapshot.getNumberOfRequests() + 1);
-                        saveMediaRecord(mediaRecord);
                         logger.error(
                                 "Exception occurred while creating MediaRecord for Media '{}' using Snapshot URL '{}': {}",
                                 media.getName(), snapshot.getUrl(), e.getMessage());
@@ -126,13 +127,24 @@ public class RecordService {
                     } finally {
                         updateSnapshot(snapshot);
                     }
-                }, executorService))
+                }, executorService)
+                        .handle((result, ex) -> { // Using handle instead of thenApply
+                            if (ex != null) {
+                                logger.error("Task failed for snapshot: {}",
+                                        snapshot.getTimestamp().getOriginalValue());
+                                return null; // or some other failure handling
+                            } else {
+                                logger.info("Task complete for snapshot: {}",
+                                        snapshot.getTimestamp().getOriginalValue());
+                                return result;
+                            }
+                        }))
                 .collect(Collectors.toList());
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                 .thenRun(() -> {
-                    logger.info("Complete Future");
-                    media.setBusy(false);
+                    logger.info("Task complete, {}", futures.size());
+                    // media.setBusy(false);
                     mediaBeingProcessed.remove(mediaName);
                 });
 
@@ -147,13 +159,14 @@ public class RecordService {
                 continue;
             }
             List<ResponseSnapshot> responseSnapshotsAvList = responseSnapshotRepository
-                    .findByAvailableAndMediaRecord_Media(false, media);
-            logger.info("Handling snapshot errors {} for media: {}", responseSnapshotsAvList.size(),
-                    media.getName());
+                    .findByAvailableAndMalId(false, media.getMalId());
+
             var filterdResponseSnapshotsAvList = responseSnapshotsAvList.stream()
                     .filter(snapshot -> (snapshot.getSnapshotStatus().startsWith("2")
                             || snapshot.getSnapshotStatus().startsWith("3")) && snapshot.getNumberOfRequests() < 3)
                     .collect(Collectors.toList());
+            logger.info("Handling snapshot errors {} for media: {}", filterdResponseSnapshotsAvList.size(),
+                    media.getName());
             createRecordsAsync(media, filterdResponseSnapshotsAvList);
         }
 
@@ -163,7 +176,6 @@ public class RecordService {
         logger.debug("Updating snapshot: {}", responseSnapshot.getUrl());
         responseSnapshotRepository.save(responseSnapshot);
     }
-
 
     private List<MediaRecord> createRecordsSync(List<String> urls, Media media) {
         logger.info("Starting sync record creation for media: {}", media.getName());
@@ -234,7 +246,7 @@ public class RecordService {
 
         Media media = mediaService.getFullMediaByUrl(malUrl);
         archiveResponse.setMediaId(media.getId());
-        List<MediaRecord> mediaRecords = recordRepository.findAllByMediaAndResponseSnapshot_Available(media,true);
+        List<MediaRecord> mediaRecords = recordRepository.findAllByMediaAndResponseSnapshot_Available(media, true);
         List<ResponseSnapshot> responseSnapshots = waybackService.getSnapshotList(media);
         List<ResponseSnapshot> filteredResponseSnapshots = filterNotExistingArchiveUrls(responseSnapshots);
         createRecordsAsync(media, filteredResponseSnapshots);
@@ -242,14 +254,14 @@ public class RecordService {
         archiveResponse.setFirst(responseSnapshots.get(0));
         archiveResponse.setLast(responseSnapshots.get(responseSnapshots.size() - 1));
         archiveResponse.setTotal(responseSnapshots.size());
-        archiveResponse.setComplete(responseSnapshots.size() == mediaRecords.size());
-        archiveResponse.setTotalAvailable(mediaRecords.size());
         List<ResponseSnapshot> unavailableSnapshtos = responseSnapshotRepository
-                .findByAvailableAndMediaRecord_Media(false, media)
+                .findByAvailableAndMalId(false, media.getMalId())
                 .stream()
                 .filter(snapshot -> snapshot.getNumberOfRequests() >= 3)
                 .collect(Collectors.toList());
-        archiveResponse.setTotalUnavailable(unavailableSnapshtos.size());
+        archiveResponse.setComplete(responseSnapshots.size() == (mediaRecords.size() + unavailableSnapshtos.size()));
+        archiveResponse.setTotalAvailable(mediaRecords.size());
+
         archiveResponse.setTotalUnavailable(unavailableSnapshtos.size());
 
         return archiveResponse;

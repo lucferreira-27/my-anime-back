@@ -3,11 +3,13 @@ package com.lucferreira.myanimeback.service;
 import com.lucferreira.myanimeback.exception.WaybackTimestampParseException;
 import com.lucferreira.myanimeback.model.media.Media;
 import com.lucferreira.myanimeback.model.snapshot.ResponseSnapshot;
+import com.lucferreira.myanimeback.model.snapshot.Timestamp;
 import com.lucferreira.myanimeback.repository.ResponseSnapshotRepository;
 import com.lucferreira.myanimeback.service.wayback.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,12 +39,23 @@ public class WaybackService {
 
     private List<ResponseSnapshot> getArchiveSnapshotList(Media media) {
         List<ResponseSnapshot> responseSnapshots = waybackMachineClient.getSnapshotList(media);
-        List<ResponseSnapshot> filterdResponseSnapshots = responseSnapshots
-                .stream()
-                .filter(snapshot -> snapshot.getSnapshotStatus().startsWith("2")
-                        || snapshot.getSnapshotStatus().startsWith("3"))
-                .collect(Collectors.toList());
-        return filterdResponseSnapshots;
+        List<ResponseSnapshot> filteredResponseSnapshots = new ArrayList<>();
+
+        for (int i = 0; i < responseSnapshots.size() - 1; i++) {
+            ResponseSnapshot currentSnapshot = responseSnapshots.get(i);
+            String status = currentSnapshot.getSnapshotStatus();
+
+            if (!status.startsWith("2") && !status.startsWith("3")) {
+                continue;
+            }
+
+            ResponseSnapshot nextSnapshot = responseSnapshots.get(i + 1);
+            if (!Timestamp.isSameDay(currentSnapshot.getTimestamp(), nextSnapshot.getTimestamp())) {
+                filteredResponseSnapshots.add(currentSnapshot);
+            }
+        }
+
+        return filteredResponseSnapshots;
     }
 
     private List<ResponseSnapshot> getLocalSnapshotList(Long malId) {

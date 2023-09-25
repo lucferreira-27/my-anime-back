@@ -40,7 +40,7 @@ public class MediaScrape extends PageScraper<MediaRecord> {
         Map<MediaAnchors, String> parseTextMap = getParseTexts(elements, doc);
 
         return new MediaRecord.Builder()
-                .archiveUrl(documentUrl)
+                .archiveUrl(url)
                 .members(ParseNumber.getIntValue(MediaAnchors.MEDIA_MEMBERS, parseTextMap))
                 .scoreValue(ParseNumber.getDoubleValue(MediaAnchors.MEDIA_SCORE_VALUE, parseTextMap))
                 .totalVotes(ParseNumber.getIntValue(MediaAnchors.MEDIA_SCORE_VOTES, parseTextMap))

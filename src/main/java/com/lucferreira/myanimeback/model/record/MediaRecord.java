@@ -121,6 +121,10 @@ public class MediaRecord {
         return archiveDate;
     }
 
+    public void setArchiveDate(Date archiveDate) {
+        this.archiveDate = archiveDate;
+    }
+
     public Media getMedia() {
         return media;
     }
@@ -136,9 +140,11 @@ public class MediaRecord {
     public void setResponseSnapshot(ResponseSnapshot responseSnapshot) {
         this.responseSnapshot = responseSnapshot;
     }
+
     public void setId(Long id) {
         this.id = id;
     }
+
     public Long getId() {
         return id;
     }
@@ -205,4 +211,5 @@ public class MediaRecord {
                     media);
         }
     }
+
 }

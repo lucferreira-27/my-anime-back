@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 
@@ -21,9 +22,9 @@ public class Timestamp {
     private Long id;
     private Date date;
     private String originalValue;
-    
-    public Timestamp(){
-        
+
+    public Timestamp() {
+
     }
 
     public Timestamp(String value) throws WaybackTimestampParseException {
@@ -61,13 +62,13 @@ public class Timestamp {
             }
             return new SimpleDateFormat(format).parse(originalValue);
         } catch (ParseException e) {
-            throw new WaybackTimestampParseException(String.format("Unable to parse timestamp: '%s' format should be yyyyMMdd, yyyyMM or yyyy", value));
+            throw new WaybackTimestampParseException(
+                    String.format("Unable to parse timestamp: '%s' format should be yyyyMMdd, yyyyMM or yyyy", value));
         }
     }
 
-
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-    public Date getDate(){
+    public Date getDate() {
         return this.date;
     }
 
@@ -77,12 +78,15 @@ public class Timestamp {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Timestamp timestamp = (Timestamp) o;
         return Objects.equals(date, timestamp.date) && Objects.equals(originalValue, timestamp.originalValue);
     }
-    public static Timestamp valueOf(String value){
+
+    public static Timestamp valueOf(String value) {
         return new Timestamp(value);
     }
 
@@ -94,5 +98,15 @@ public class Timestamp {
     @Override
     public String toString() {
         return originalValue;
+    }
+
+    public static boolean isSameDay(Timestamp timestamp, Timestamp timestamp2) {
+        Calendar cal1 = Calendar.getInstance();
+        cal1.setTime(timestamp.getDate());
+        Calendar cal2 = Calendar.getInstance();
+        cal2.setTime(timestamp2.getDate());
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
+                cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH);
     }
 }

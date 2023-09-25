@@ -24,7 +24,7 @@ import net.sandrohc.jikan.exception.JikanQueryException;
 public class RecordCreationService {
     private final RecordRepository recordRepository;
     private final ScrapeService scrapeService;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(5); // Adjust the pool size as needed
+    private final ExecutorService executorService = Executors.newFixedThreadPool(15); // Adjust the pool size as needed
 
     @Autowired
     public RecordCreationService(RecordRepository recordRepository,

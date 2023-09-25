@@ -28,5 +28,7 @@ public interface ResponseSnapshotRepository extends JpaRepository<ResponseSnapsh
 
     List<ResponseSnapshot> findByAvailableAndMediaRecord_Media(boolean available, Media media);
 
+    List<ResponseSnapshot> findByAvailableAndMalId(boolean b, Long malId);
+
 
 }
