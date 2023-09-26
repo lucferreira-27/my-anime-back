@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class WaybackService {
@@ -59,7 +58,7 @@ public class WaybackService {
     }
 
     private List<ResponseSnapshot> getLocalSnapshotList(Long malId) {
-        return responseSnapshotRepository.findAllByMalId(malId);
+        return responseSnapshotRepository.findAllByAvailableAndMalId(true,malId);
     }
 
     public List<ResponseSnapshot> getSnapshotByTimestamp(Media media, String timestamp) {

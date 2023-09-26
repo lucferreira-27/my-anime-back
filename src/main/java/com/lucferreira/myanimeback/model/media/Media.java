@@ -1,4 +1,5 @@
 package com.lucferreira.myanimeback.model.media;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,6 +22,7 @@ public class Media  {
     private int popularityPosition;
     private int favoritesCount;
     private String imageUrl;
+    @Column(unique = true)
     private String myanimelistUrl;
     private String type;
     private Date startDate;

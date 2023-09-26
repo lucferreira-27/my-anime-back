@@ -2,6 +2,7 @@ package com.lucferreira.myanimeback.service;
 
 import com.lucferreira.myanimeback.model.ArchiveRequest;
 import com.lucferreira.myanimeback.model.ArchiveResponse;
+import com.lucferreira.myanimeback.model.InstantArchiveRequest;
 import com.lucferreira.myanimeback.model.media.Media;
 import com.lucferreira.myanimeback.model.record.MediaRecord;
 import com.lucferreira.myanimeback.model.record.TopListRecord;
@@ -58,40 +59,46 @@ public class RecordService {
 
     private MediaRecord getOrCreateMediaRecord(Media media, ResponseSnapshot snapshot) throws JikanQueryException {
         logger.debug("Checking if record already exists for media: {}", media.getName());
-        MediaRecord record = null;
+        Optional<MediaRecord> foundRecord;
         synchronized (recordRepository) {
-            Optional<MediaRecord> foundRecord = recordRepository.findByArchiveUrl(snapshot.getUrl());
-            if (foundRecord.isPresent()) {
-                record = foundRecord.get();
-                if (record.getArchiveDate() != null) {
-                    logger.debug("Record already exists for media: {}", media.getName());
-                    return foundRecord.get();
-                }
+            foundRecord = recordRepository.findByArchiveUrl(snapshot.getUrl());
+        }
 
-            }
+        if (foundRecord.isPresent()) {
+            logger.debug("Record already exists for media: {}", media.getName());
+            return foundRecord.get();
         }
+        MediaRecord record = createNewMediaRecord(snapshot, media);
+        updateMediaRecord(record, snapshot, media);
+        return record;
+    }
+
+    private MediaRecord createNewMediaRecord(ResponseSnapshot snapshot, Media media) throws JikanQueryException {
         logger.debug("Creating new record for media: {}", media.getName());
-        MediaRecord mediaRecord = recordCreationService.getMediaRecord(snapshot.getUrl());
-        if (record != null) {
-            record.setFavorites(mediaRecord.getFavorites());
-            record.setScoreValue(mediaRecord.getScoreValue());
-            record.setTotalVotes(mediaRecord.getTotalVotes());
-            record.setPopularity(mediaRecord.getPopularity());
-            record.setMembers(mediaRecord.getMembers());
-            record.setRanked(mediaRecord.getRanked());
-            record.setArchiveDate(mediaRecord.getArchiveDate());
-        } else {
-            record = mediaRecord;
-        }
+        return recordCreationService.getMediaRecord(snapshot.getUrl());
+    }
+
+    private void updateMediaRecord(MediaRecord record, ResponseSnapshot snapshot, Media media)
+            throws JikanQueryException {
+        MediaRecord updatedRecord = recordCreationService.getMediaRecord(snapshot.getUrl());
+
+        record.setFavorites(updatedRecord.getFavorites());
+        record.setScoreValue(updatedRecord.getScoreValue());
+        record.setTotalVotes(updatedRecord.getTotalVotes());
+        record.setPopularity(updatedRecord.getPopularity());
+        record.setMembers(updatedRecord.getMembers());
+        record.setRanked(updatedRecord.getRanked());
+        record.setArchiveDate(updatedRecord.getArchiveDate());
+
         responseSnapshotRepository.save(snapshot); // Save the snapshot first
+
         record.setMedia(media);
         record.setResponseSnapshot(snapshot);
         snapshot.setMediaRecord(record);
         snapshot.setAvailable(true);
         snapshot.setNumberOfRequests(snapshot.getNumberOfRequests() + 1);
-        saveMediaRecord(record);
 
-        return record;
+        saveMediaRecord(record);
     }
 
     private void createRecordsAsync(Media media, List<ResponseSnapshot> responseSnapshots) {
@@ -143,6 +150,19 @@ public class RecordService {
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                 .thenRun(() -> {
+                    List<MediaRecord> newRecords = recordRepository.findAllByMedia(media).stream()
+                            .filter(r -> r.getResponseSnapshot() == null).toList();
+                    var newSnapshots = responseSnapshotRepository.findAllByMalId(media.getMalId());
+                    for (MediaRecord record : newRecords) {
+                        for (ResponseSnapshot snapshot : newSnapshots) {
+                            if (record.getArchiveUrl().equals(snapshot.getUrl())) {
+                                snapshot.setMediaRecord(record);
+                                updateSnapshot(snapshot);
+                                record.setResponseSnapshot(snapshot);
+                                saveMediaRecord(record);
+                            }
+                        }
+                    }
                     logger.info("Task complete, {}", futures.size());
                     // media.setBusy(false);
                     mediaBeingProcessed.remove(mediaName);
@@ -158,12 +178,12 @@ public class RecordService {
             if (!mediaBeingProcessed.add(mediaName)) {
                 continue;
             }
+
             List<ResponseSnapshot> responseSnapshotsAvList = responseSnapshotRepository
-                    .findByAvailableAndMalId(false, media.getMalId());
+                    .findAllByAvailableAndMalId(false, media.getMalId());
 
             var filterdResponseSnapshotsAvList = responseSnapshotsAvList.stream()
-                    .filter(snapshot -> (snapshot.getSnapshotStatus().startsWith("2")
-                            || snapshot.getSnapshotStatus().startsWith("3")) && snapshot.getNumberOfRequests() < 3)
+                    .filter(snapshot -> snapshot.getNumberOfRequests() < 3)
                     .collect(Collectors.toList());
             logger.info("Handling snapshot errors {} for media: {}", filterdResponseSnapshotsAvList.size(),
                     media.getName());
@@ -216,14 +236,22 @@ public class RecordService {
         recordRepository.save(mediaRecord);
     }
 
-    public List<MediaRecord> createMediaRecords(List<String> urls, String malUrl) throws JikanQueryException {
+    public List<MediaRecord> createMediaRecords(InstantArchiveRequest instantArchiveRequest)
+            throws JikanQueryException {
 
-        Media media = mediaService.getFullMediaByUrl(malUrl);
+        Media media = mediaService.getFullMediaByUrl(instantArchiveRequest.getMalUrl());
+        List<MediaRecord> records = recordRepository.findAllByMedia(media);
+        if (records.isEmpty()) {
+            List<MediaRecord> newRecords = createRecordsSync(instantArchiveRequest.getUrls(), media);
+            createMediaRecords(new ArchiveRequest(instantArchiveRequest.getMalUrl()));
+            return newRecords;
+        }
+        List<MediaRecord> filteredRecords = records.stream()
+                .filter(record -> instantArchiveRequest.getUrls().contains(record.getArchiveUrl()))
+                .collect(Collectors.toList());
 
-        List<MediaRecord> records = createRecordsSync(urls, media);
-
-        createMediaRecords(new ArchiveRequest(malUrl));
-        return records;
+        filteredRecords.stream().filter(r -> r.getResponseSnapshot() == null);
+        return filteredRecords;
     }
 
     private List<ResponseSnapshot> filterNotExistingArchiveUrls(List<ResponseSnapshot> responseSnapshots) {
@@ -232,7 +260,7 @@ public class RecordService {
                     var status = snapshot.getSnapshotStatus().startsWith("2")
                             || snapshot.getSnapshotStatus().startsWith("3");
                     var notExists = recordRepository.existsByArchiveUrl(snapshot.getUrl());
-                    var isAboveLimitOfTotalRequests = snapshot.getNumberOfRequests() > 3;
+                    var isAboveLimitOfTotalRequests = snapshot.getNumberOfRequests() >= 3;
                     return status && !notExists && !isAboveLimitOfTotalRequests;
                 })
                 .collect(Collectors.toList());
@@ -247,6 +275,11 @@ public class RecordService {
         Media media = mediaService.getFullMediaByUrl(malUrl);
         archiveResponse.setMediaId(media.getId());
         List<MediaRecord> mediaRecords = recordRepository.findAllByMediaAndResponseSnapshot_Available(media, true);
+        List<ResponseSnapshot> unavailableSnapshtos = responseSnapshotRepository
+                .findAllByAvailableAndMalId(false, media.getMalId())
+                .stream()
+                .filter(snapshot -> snapshot.getNumberOfRequests() >= 3)
+                .collect(Collectors.toList());
         List<ResponseSnapshot> responseSnapshots = waybackService.getSnapshotList(media);
         List<ResponseSnapshot> filteredResponseSnapshots = filterNotExistingArchiveUrls(responseSnapshots);
         createRecordsAsync(media, filteredResponseSnapshots);
@@ -254,11 +287,7 @@ public class RecordService {
         archiveResponse.setFirst(responseSnapshots.get(0));
         archiveResponse.setLast(responseSnapshots.get(responseSnapshots.size() - 1));
         archiveResponse.setTotal(responseSnapshots.size());
-        List<ResponseSnapshot> unavailableSnapshtos = responseSnapshotRepository
-                .findByAvailableAndMalId(false, media.getMalId())
-                .stream()
-                .filter(snapshot -> snapshot.getNumberOfRequests() >= 3)
-                .collect(Collectors.toList());
+
         archiveResponse.setComplete(responseSnapshots.size() == (mediaRecords.size() + unavailableSnapshtos.size()));
         archiveResponse.setTotalAvailable(mediaRecords.size());
 
@@ -269,5 +298,13 @@ public class RecordService {
 
     public List<TopListRecord> createTopListRecords(String archiveUrl) {
         return List.of(recordCreationService.getTopListRecord(archiveUrl));
+    }
+
+    public List<MediaRecord> listRecordsById(String id) {
+        return recordRepository.findAllByMediaId(Long.parseLong(id));
+    }
+
+    public List<MediaRecord> listRecordsByMalId(String id) {
+        return recordRepository.findAllByMedia_MalId(Long.parseLong(id));
     }
 }

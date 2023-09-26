@@ -28,6 +28,10 @@ public interface RecordRepository extends JpaRepository<MediaRecord, Long> {
 
     List<MediaRecord> findAllByMediaAndResponseSnapshot_Available(Media media,boolean available);
 
+    List<MediaRecord> findAllByMedia_MalId(long parseLong);
+
+	List<MediaRecord> findAllByMediaId(long parseLong);
+
     
 
 }

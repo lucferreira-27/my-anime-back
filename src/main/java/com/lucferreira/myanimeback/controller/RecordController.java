@@ -1,5 +1,6 @@
 package com.lucferreira.myanimeback.controller;
 
+import com.lucferreira.myanimeback.model.InstantArchiveRequest;
 import com.lucferreira.myanimeback.model.record.MediaRecord;
 import com.lucferreira.myanimeback.model.record.TopListRecord;
 import com.lucferreira.myanimeback.service.RecordService;
@@ -35,19 +36,20 @@ public class RecordController {
                                                         +
                                                         "  \"https://web.archive.org/web/20200407163618/https://myanimelist.net/anime/5114/Fullmetal_Alchemist__Brotherhood\"\n"
                                                         +
-                                                        "]", required = true, schema = @Schema(implementation = List.class, defaultValue = "[\"https://web.archive.org/web/20200407163618/https://myanimelist.net/anime/5114/Fullmetal_Alchemist__Brotherhood\"]")) @RequestBody List<String> urls,
-                        String malUrl) throws JikanQueryException {
-                List<MediaRecord> records = recordService.createMediaRecords(urls, malUrl);
+                                                        "]", required = true, schema = @Schema(implementation = List.class, defaultValue = "[\"https://web.archive.org/web/20200407163618/https://myanimelist.net/anime/5114/Fullmetal_Alchemist__Brotherhood\"]")) @RequestBody InstantArchiveRequest instantArchiveRequest)
+                        throws JikanQueryException {
+                List<MediaRecord> records = recordService.createMediaRecords(instantArchiveRequest);
                 return ResponseEntity.ok(records);
         }
-        @Operation(summary = "List all records in the system")
+
+        @Operation(summary = "List records in the system")
         @ApiResponse(responseCode = "200", description = "Successfully retrieved list of records", content = @Content(mediaType = "application/json", schema = @Schema(implementation = MediaRecord.class)))
         @GetMapping("/list")
-        public ResponseEntity<List<MediaRecord>> listRecords() {
-            List<MediaRecord> records = recordService.listRecords();
-            return ResponseEntity.ok(records);
+        public ResponseEntity<List<MediaRecord>> listRecords(
+                        @Parameter(description = "ID of the record to retrieve") @RequestParam(value = "mediaId", required = false) String id) {
+                List<MediaRecord> records = recordService.listRecordsById(id);
+                return ResponseEntity.ok(records);
         }
-        
 
         @Operation(summary = "Get a top list record by its URL")
         @ApiResponse(responseCode = "200", description = "Successfully retrieved top list record", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TopListRecord.class)))
