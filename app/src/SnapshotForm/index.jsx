@@ -33,7 +33,7 @@ const AnimatedResourceProgressNumber = animated(ResourceProgressNumber)
 
 export default function SnapshotForm({ formData, setFormData, snapshotData }) {
   const splitSnapshots = useSplitSnapshots(snapshotData, formData);
-  const { resources, setResources, setShowTimeline } = useContext(Context)
+  const { resources, setResources, setShowTimeline,media } = useContext(Context)
   const [submitBtn, setSubmitBtn] = useState(true)
   const [working, setWorking] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -58,12 +58,13 @@ export default function SnapshotForm({ formData, setFormData, snapshotData }) {
 
     const loadSnapshots = async () => {
       setWorking(true);
+      const malUrl = media.url
       for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
         const start = batchIndex * batchSize;
         const end = start + batchSize;
         const batchUrls = [...splitSnapshots].slice(start, end);
 
-        const batchPromises = [getNextSnapshot(batchUrls)]; // Pass the batchUrls to getNextSnapshot
+        const batchPromises = [getNextSnapshot(malUrl,batchUrls)]; // Pass the batchUrls to getNextSnapshot
 
         const batchResults = await Promise.all(batchPromises);
 
@@ -81,7 +82,7 @@ export default function SnapshotForm({ formData, setFormData, snapshotData }) {
 
 
   const viewTimeLine = () => {
-    setResources(resources.sort((a, b) => new Date(a.archiveDate).getTime() - new Date(b.archiveDate).getTime()))
+    setResources(resources.sort((a, b) => parseInt(a.responseSnapshot.timestamp.dateInMillis) - parseInt(b.responseSnapshot.timestamp.dateInMillis)))
     setShowTimeline(true) 
   }
 

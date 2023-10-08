@@ -63,6 +63,7 @@ const Timeline = () => {
     };
 
     const downloadData = () => {
+        console.log(resources)
         const csvData = convertToCSV(resources);
         const blob = new Blob([csvData], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
@@ -92,7 +93,7 @@ const Timeline = () => {
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <Box>
-                                <MembersChart resources={resources} />
+                               <MembersChart resources={resources} />
                                 <Button sx={{
                                     margin: `20px`
                                 }} variant={'contained'} onClick={() => downloadData()}>Download</Button>

@@ -18,13 +18,12 @@ const axiosInstance = axios.create({
 const getSnapshotsByUrl = async (url) => {
   try {
     const regex = /\/[^/]+$/;
-    const normalUrl = url
+    const normalUrl = url 
     const urlWithId = url.replace(regex, '')
 
     const response = axiosInstance.get(`/wayback/snapshot?url=${normalUrl}`);
-    const responseWithId = axiosInstance.get(`/wayback/snapshot?url=${urlWithId}`);
-    const finalResponse = await Promise.all([response, responseWithId]);
-    return await Promise.all([response, responseWithId]);
+    const {data} = await Promise.resolve(response);
+    return data;
   } catch (error) {
     // Handle error here
     console.error('Error fetching snapshots:', error);
@@ -32,9 +31,14 @@ const getSnapshotsByUrl = async (url) => {
   }
 };
 
-const getRecordByArchive = async (archiveUrls) => {
+const listRecordsByMalUrl = (malUrl) =>{
+
+}
+
+const getRecordByArchive = async (malUrl,archiveUrls) => {
   try {
-    const response = await axiosInstance.post('/wayback/record/media', archiveUrls);
+
+    const response = await axiosInstance.post('/wayback/record/media/new', {malUrl,urls:archiveUrls});
     return response.data;
   } catch (error) {
     // Handle error here
@@ -42,6 +46,10 @@ const getRecordByArchive = async (archiveUrls) => {
     throw error;
   }
 };
+
+const getMediaByUrl = async (url) =>{
+
+}
 
 const convertToGif = async (dataUrls) => {
   try {

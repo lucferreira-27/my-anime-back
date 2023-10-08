@@ -25,7 +25,7 @@ const useGifGenerator = (config,timeDisplayRef, resources, setTimeMedia, filenam
             workers: 2,
             workerScript: '/gif.worker.js', // Directly reference the file from the public directory
             quality: config.quality,
-            dither: config.dither
+            dither: config.dither,
         });
 
         for (let frame of frames) {
@@ -55,8 +55,15 @@ const useGifGenerator = (config,timeDisplayRef, resources, setTimeMedia, filenam
             setIsGenerating(true);
             const node = timeDisplayRef.current;
             const frames = [];
-
-            for (let resource of resources) {
+            const totalResources = resources.length;
+            const maxFrames = config.frames;  // The maximum frames you want in your GIF
+    
+            // Calculate the interval to skip frames while keeping the max limit
+            const skipInterval = Math.floor(totalResources / maxFrames);
+    
+            // Loop through each resource
+            for (let i = 0; i < totalResources; i += skipInterval) {
+                const resource = resources[i];
                 if (resource) {
                     setTimeMedia(prevTimeMedia => ({
                         ...prevTimeMedia,
@@ -67,28 +74,48 @@ const useGifGenerator = (config,timeDisplayRef, resources, setTimeMedia, filenam
                         popularity: resource.popularity,
                         scored_by: resource.totalVotes
                     }));
-
-                    await new Promise(resolve => setTimeout(resolve, 100));
-
+    
+                   // await new Promise(resolve => setTimeout(resolve, 10));
+    
                     const dataUrl = await domtoimage.toPng(node);
                     frames.push(dataUrl);
                 }
             }
-
+    
+            // Handle the last frame to ensure the timelapse reaches the end
+            if (resources[totalResources - 1] && frames.length < maxFrames) {
+                const resource = resources[totalResources - 1];
+                setTimeMedia(prevTimeMedia => ({
+                    ...prevTimeMedia,
+                    archiveDate: resource.archiveDate,
+                    score: resource.scoreValue,
+                    rank: resource.ranked,
+                    members: resource.members,
+                    popularity: resource.popularity,
+                    scored_by: resource.totalVotes
+                }));
+    
+                await new Promise(resolve => setTimeout(resolve, 10));
+    
+                const dataUrl = await domtoimage.toPng(node);
+                frames.push(dataUrl);
+            }
+    
             const blob = await convertFramesToGif(frames);
             const gifUrl = URL.createObjectURL(blob);
-
+    
             const a = document.createElement('a');
             a.href = gifUrl;
             a.download = formatFileName(filename)
             a.click();
-
+    
             setIsGenerating(false);
         } catch (error) {
             console.error(error);
             setIsGenerating(false);
         }
-    }, [timeDisplayRef, resources, setTimeMedia,config]);
+    }, [timeDisplayRef, resources, setTimeMedia, config]);
+    
 
     return { isGenerating, createGif, };
 };

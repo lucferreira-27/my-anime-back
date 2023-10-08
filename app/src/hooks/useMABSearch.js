@@ -13,11 +13,10 @@ const useMABSearch = () => {
         try {
             setSnapshotData(null)
             setLoading(true);
-            setError(null);
-            const [{ data:data1 },{ data:data2 }] = await getSnapshotsByUrl(url);
-            const data = [...data1,...data2].sort((a, b) =>  a.timestamp.date - b.timestamp.date)
-
-            setSnapshotData(data);
+           // const media = await getMediaByUrl(url)
+            const snapshtots = await getSnapshotsByUrl(url)
+            const sortedSnapshots=  snapshtots.sort((a, b) =>  a.timestamp.dateInMillis - b.timestamp.dateInMillis)
+            setSnapshotData(sortedSnapshots);
         } catch (error) {
             setError(error.message);
         } finally {

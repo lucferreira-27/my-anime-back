@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Paper, Slider, Stack, TextField, Typography } from '@mui/material';
 import { PauseRounded, PlayArrowRounded } from '@mui/icons-material';
 import styled from '@mui/system/styled';
@@ -20,11 +20,11 @@ const StyledSlider = styled(Slider)({
         borderRadius: 0,
         width: '10px',
         height: '20px',
-        transition: 'all 0.5s ease',
+        transition: '',
     },
     '& .MuiSlider-track': {
         borderRadius: 0,
-        transition: 'all 0.5s ease',
+        transition: '',
     },
     '& .MuiSlider-rail': {
         borderRadius: 0,
@@ -76,6 +76,15 @@ const TimelineDate = styled(Typography)({
 
 const AnimatedTimelineDate = animated(TimelineDate)
 
+function debounce(func, delay) {
+    let debounceTimer;
+    return function () {
+        const context = this;
+        const args = arguments;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    };
+}
 
 export default function TimelineSlider({ resources, timeMedia, setTimeMedia }) {
     const [sliderValue, setSliderValue] = useState(0);
@@ -83,7 +92,7 @@ export default function TimelineSlider({ resources, timeMedia, setTimeMedia }) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isReseting, setIsReset] = useState(false);
     const [duration, setDuration] = useState(15);
-
+    const [isChangeCommitted, setChangeCommited] = useState(false)
     const milesecondsDateSpring = useSpring({
         to: { milesecondsDate: currentDate },
         from: { milesecondsDate: currentDate - 1 },
@@ -94,32 +103,57 @@ export default function TimelineSlider({ resources, timeMedia, setTimeMedia }) {
         setSliderValue(newValue);
     };
 
-    const togglePlayPause = () => {
+    const togglePlayPause = useCallback(() => {
         setIsPlaying((prev) => !prev);
 
         if (sliderValue === resources.length && !isPlaying) {
             setIsReset(true);
         }
-    };
+    }, [isPlaying, resources.length, sliderValue]);
 
     useEffect(() => {
-        const currentResource = resources[sliderValue]
-        if (currentResource) {
-            timeMedia.archiveDate = currentResource.archiveDate
-            timeMedia.score = currentResource.scoreValue
-            timeMedia.rank = currentResource.ranked
-            timeMedia.members = currentResource.members
-            timeMedia.popularity = currentResource.popularity
-            timeMedia.scored_by = currentResource.totalVotes
-            setTimeMedia({ ...timeMedia })
-            setCurrentDate(new Date(currentResource.archiveDate).getTime())
+        const currentResource = resources[sliderValue - 1];
+        if (!currentResource) {
+            setChangeCommited(false)
+            return
         }
+        if (isChangeCommitted) {
 
-    }, [sliderValue])
+            setTimeMedia((prevTimeMedia) => ({
+                ...prevTimeMedia,
+                archiveDate: currentResource.archiveDate,
+                score: currentResource.scoreValue,
+                rank: currentResource.ranked,
+                members: currentResource.members,
+                popularity: currentResource.popularity,
+                scored_by: currentResource.totalVotes,
+            }));
+            setChangeCommited(false)
+        }
+    }, [isChangeCommitted])
+
+    useEffect(() => {
+        const currentResource = resources[sliderValue];
+        if (currentResource) {
+            setCurrentDate(currentResource.responseSnapshot.timestamp.dateInMillis);
+        }
+        if (isPlaying && currentResource) {
+            const currentResource = resources[sliderValue];
+
+            setTimeMedia((prevTimeMedia) => ({
+                ...prevTimeMedia,
+                archiveDate: currentResource.archiveDate,
+                score: currentResource.scoreValue,
+                rank: currentResource.ranked,
+                members: currentResource.members,
+                popularity: currentResource.popularity,
+                scored_by: currentResource.totalVotes,
+            }));
+        }
+    }, [sliderValue, resources, setTimeMedia]);
 
     useEffect(() => {
         let interval;
-
         if (isReseting) {
             interval = setInterval(() => {
                 setSliderValue((prevValue) => (prevValue > 0 ? prevValue - 5 : 0));
@@ -129,13 +163,11 @@ export default function TimelineSlider({ resources, timeMedia, setTimeMedia }) {
                 }
             }, 10);
         }
-
         return () => clearInterval(interval);
     }, [isReseting, sliderValue]);
 
     useEffect(() => {
         let interval;
-
         if (isPlaying && sliderValue < resources.length) {
             interval = setInterval(() => {
                 setSliderValue((prevValue) =>
@@ -148,18 +180,16 @@ export default function TimelineSlider({ resources, timeMedia, setTimeMedia }) {
             togglePlayPause();
             clearInterval(interval);
         }
-
         return () => clearInterval(interval);
-    }, [isPlaying, sliderValue]);
+    }, [isPlaying, sliderValue, resources.length, duration, togglePlayPause]);
 
     return (
         <StyledPaper>
             <Stack>
                 <StyledSlider
-                    valueLabelDisplay="on"
-                    marks
                     max={resources.length}
                     onChange={handleSliderChange}
+                    onChangeCommitted={() => setChangeCommited(true)}
                     value={sliderValue}
                     disabled={false}
                 />
@@ -168,7 +198,7 @@ export default function TimelineSlider({ resources, timeMedia, setTimeMedia }) {
                     togglePlayPause={togglePlayPause}
                     currentDate={currentDate}
                     duration={duration}
-                    setDuration={setDuration} 
+                    setDuration={setDuration}
                 />
             </Stack>
         </StyledPaper>

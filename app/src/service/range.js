@@ -145,7 +145,7 @@ const getSplitSnapshots = (snapshots, config) => {
     const { startDate: strStartDate, endDate: strEndDate, distanceType, distance } = config;
     const startDate = parseDate(strStartDate);
     const endDate = parseDate(strEndDate);
-    const sortedDates = sortSnapshots(snapshots).map((snapshot) => snapshot.timestamp.date);
+    const sortedDates = sortSnapshots(snapshots).map((snapshot) => snapshot.timestamp.dateInMillis);
     const startDateMilliseconds = getMillisecondsInDate(startDate);
     const endDateMilliseconds = getMillisecondsInDate(endDate);
     const datesInRange = [];
@@ -186,8 +186,7 @@ const getSplitSnapshots = (snapshots, config) => {
     }
     const splitSnapshots = snapshots
         .filter((snapshot) => rangeDates
-            .find(range => range.getTime() == snapshot.timestamp.date) 
-                && (snapshot.snapshotStatus.startsWith("2") || snapshot.snapshotStatus == "301") 
+            .find(range => range.getTime() == snapshot.timestamp.dateInMillis)
         )
     return splitSnapshots;
 };

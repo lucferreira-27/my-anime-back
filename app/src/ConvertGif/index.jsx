@@ -55,16 +55,30 @@ const StyledTextField = styled(TextField)`
 
 const ConvertGif = ({ timeDisplayRef, resources, setTimeMedia, timeMedia }) => {
     const [open, setOpen] = useState(false);
-    const [config, setConfig] = useState({ delay: 500, dither: false, quality: 10 })
-
+    const [config, setConfig] = useState({
+        delay: 300,
+        dither: false,
+        quality: 10,
+        frames: 200 <= resources.length ? 200 : resources.length,
+        mls: 200,
+    })
     const { isGenerating, createGif } = useGifGenerator(config, timeDisplayRef, resources, setTimeMedia, timeMedia?.title);
+    useState(() => {
+        setConfig({
+            delay: 300,
+            dither: false,
+            quality: 10,
+            frames: 200 <= resources.length ? 200 : resources.length,
+            mls: 200,
+        })
+    }, [resources])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
     return (
         <div>
-            <Button onClick={handleOpen} variant="outlined" color="primary">Convert to GIF</Button>
+            <Button sx={{ mt: 2 }} onClick={handleOpen} variant="contained" color="primary">Convert to GIF</Button>
             <Modal
                 open={open}
                 onClose={handleClose}
@@ -139,6 +153,29 @@ const ConvertGif = ({ timeDisplayRef, resources, setTimeMedia, timeMedia }) => {
                                     }
                                     label="Dither"
                                 />
+                            </Grid>
+                            <Grid item >
+                                <StyledTextField
+                                    sx={{
+                                        width: {
+                                            xs: '100%', // For extra small devices and up
+                                            sm: 'auto', // Adjust as necessary for small devices and up
+                                        },
+                                        mt: {
+                                            xs: 1, // For extra small devices and up
+                                            sm: 1, // Adjust as necessary for small devices and up
+                                        },
+                                    }}
+                                    label="Frames"
+                                    value={config.frames}
+                                    onChange={(e) => setConfig((prev) => ({ ...prev, frames: e.target.value }))}
+                                    type="number"
+                                />
+                            </Grid>
+                            <Grid item >
+                                <Typography>
+                                    {`Duration: ${(config.frames * config.delay) / 1000}s`}
+                                </Typography>
                             </Grid>
                         </Grid>
                     </Grid>
