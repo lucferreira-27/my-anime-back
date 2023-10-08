@@ -1,4 +1,9 @@
-# MyAnimeBack - MyAnimeList Historical Data API
+#MyAnimeBack
+
+![One Piece Timeline Gif](./assets/one_piece_timeline.gif)
+*Caption: One Piece Series Timeline 2008 - 2023*
+
+## MyAnimeBack - MyAnimeList Historical Data API
 
 MyAnimeBack is a web scraping API that retrieves historical data from MyAnimeList by leveraging the Wayback Machine API. The project serves as the backend for another application and aims to provide an easy way to gather and analyze historical statistics for various anime and manga titles.
 
