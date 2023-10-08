@@ -23,6 +23,27 @@
 
 ---
 
+
+##  Frontend Screenshot
+
+<div style="display: flex; align-items: center;">
+  <div style="flex: 1;">
+    <img src="./assets/frontend_overview.png" alt="Frontend Overview">
+  </div>
+  <div style="flex: 2; margin-left: 20px;">
+    <h3>Screenshot Description</h3>
+    <p>The screenshot showcases various elements of the frontend:</p>
+    <ul>
+      <li><strong>Search Bar:</strong> At the top, a search bar lets you input a MyAnimeList URL for an anime or manga, initiating an automatic search.</li>
+      <li><strong>Information Form:</strong> Below the search bar, this form allows you to input specifics for extracting anime snapshots.</li>
+      <li><strong>Timeline Slider:</strong> Positioned under the form, this slider enables navigation through different timestamps for your chosen anime.</li>
+      <li><strong>Chart Display:</strong> On the right, a chart displays the anime's statistical trends over time.</li>
+      <li><strong>GIF Preview:</strong> On the left, a GIF provides a visual overview of the anime.</li>
+    </ul>
+  </div>
+</div>
+
+
 ##  Services
 
 ### WaybackMachineClient
