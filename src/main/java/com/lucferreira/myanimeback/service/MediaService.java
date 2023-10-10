@@ -21,13 +21,11 @@ import java.util.stream.Collectors;
 @Service
 public class MediaService {
     private final MediaRepository mediaRepository;
-    private final RecordCreationService recordCreationService;
     private final JikanService jikanService;
 
     @Autowired
-    public MediaService(MediaRepository mediaRepository, RecordCreationService recordCreationService, JikanService jikanService) {
+    public MediaService(MediaRepository mediaRepository, JikanService jikanService) {
         this.mediaRepository = mediaRepository;
-        this.recordCreationService = recordCreationService;
         this.jikanService = jikanService;
     }
 

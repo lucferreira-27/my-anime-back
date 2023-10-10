@@ -1,7 +1,6 @@
 package com.lucferreira.myanimeback.service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,21 +14,18 @@ import com.lucferreira.myanimeback.exception.RecordException;
 import com.lucferreira.myanimeback.model.media.Media;
 import com.lucferreira.myanimeback.model.record.MediaRecord;
 import com.lucferreira.myanimeback.model.record.TopListRecord;
-import com.lucferreira.myanimeback.repository.RecordRepository;
 import com.lucferreira.myanimeback.util.Regex;
 
 import net.sandrohc.jikan.exception.JikanQueryException;
 
 @Service
 public class RecordCreationService {
-    private final RecordRepository recordRepository;
     private final ScrapeService scrapeService;
     private final ExecutorService executorService = Executors.newFixedThreadPool(15); // Adjust the pool size as needed
 
     @Autowired
-    public RecordCreationService(RecordRepository recordRepository,
+    public RecordCreationService(
             ScrapeService scrapeService) {
-        this.recordRepository = recordRepository;
         this.scrapeService = scrapeService;
     }
 

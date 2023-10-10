@@ -2,7 +2,6 @@ package com.lucferreira.myanimeback.service.wayback;
 
 import com.lucferreira.myanimeback.exception.WaybackException;
 import com.lucferreira.myanimeback.exception.WaybackUnavailableException;
-import com.lucferreira.myanimeback.model.media.Media;
 import com.lucferreira.myanimeback.model.snapshot.ResponseSnapshot;
 import com.lucferreira.myanimeback.model.snapshot.Timestamp;
 

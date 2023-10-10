@@ -1,9 +1,7 @@
 package com.lucferreira.myanimeback.model.snapshot;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.lucferreira.myanimeback.exception.WaybackTimestampParseException;
-import com.lucferreira.myanimeback.model.media.Media;
 import com.lucferreira.myanimeback.model.record.MediaRecord;
 
 import jakarta.persistence.CascadeType;
@@ -30,7 +28,7 @@ public class ResponseSnapshot {
     private MediaRecord mediaRecord;
 
     public ResponseSnapshot() {
-
+        
     }
 
     public ResponseSnapshot(String url, String timestamp, String snapshotStatus, Long malId) throws WaybackTimestampParseException {

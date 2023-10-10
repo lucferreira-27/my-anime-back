@@ -21,10 +21,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +36,9 @@ public class RecordService {
     private final ResponseSnapshotRepository responseSnapshotRepository;
     private final MediaService mediaService;
     private final RecordCreationService recordCreationService;
-    private final ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+    private final ThreadPoolExecutor asyncExecutorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+    private final ThreadPoolExecutor synchExecutorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+
     private static final Logger logger = LoggerFactory.getLogger(RecordService.class);
     private final Set<String> mediaBeingProcessed = ConcurrentHashMap.newKeySet(); // Add this line
 
@@ -103,12 +103,12 @@ public class RecordService {
 
     private void createRecordsAsync(Media media, List<ResponseSnapshot> responseSnapshots) {
         String mediaName = media.getName();
-        if (executorService.getActiveCount() == 0) {
+        if (asyncExecutorService.getActiveCount() == 0) {
             mediaBeingProcessed.clear();
         }
         if (!mediaBeingProcessed.add(mediaName)) {
             logger.info("Skipping record creation for media: {} as it is already being processed THREADS: [{}]",
-                    mediaName, executorService.getActiveCount());
+                    mediaName, asyncExecutorService.getActiveCount());
             return;
         }
         logger.info("Starting async record creation for media: {} found {} snapshots", media.getName(),
@@ -134,7 +134,7 @@ public class RecordService {
                     } finally {
                         updateSnapshot(snapshot);
                     }
-                }, executorService)
+                }, asyncExecutorService)
                         .handle((result, ex) -> { // Using handle instead of thenApply
                             if (ex != null) {
                                 logger.error("Task failed for snapshot: {}",
@@ -215,7 +215,7 @@ public class RecordService {
                         logger.error("Exception occurred in CompletableFuture: {}", e.getMessage());
                         return null;
                     }
-                }, executorService))
+                }, synchExecutorService))
                 .collect(Collectors.toList());
 
         List<MediaRecord> records = futures.stream()
@@ -301,7 +301,7 @@ public class RecordService {
     }
 
     public List<MediaRecord> listRecordsById(String id) {
-        return recordRepository.findAllByMediaId(Long.parseLong(id));
+        return recordRepository.findAllByMedia_MalId(Long.parseLong(id));
     }
 
     public List<MediaRecord> listRecordsByMalId(String id) {

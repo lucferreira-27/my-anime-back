@@ -1,7 +1,6 @@
 package com.lucferreira.myanimeback.repository;
 
 import com.lucferreira.myanimeback.model.media.Media;
-import com.lucferreira.myanimeback.model.record.MediaRecord;
 import com.lucferreira.myanimeback.model.snapshot.ResponseSnapshot;
 import com.lucferreira.myanimeback.model.snapshot.Timestamp;
 

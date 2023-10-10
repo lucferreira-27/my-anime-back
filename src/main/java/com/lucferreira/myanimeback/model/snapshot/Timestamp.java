@@ -22,14 +22,18 @@ public class Timestamp {
     private Long id;
     private Date date;
     private String originalValue;
+    private Long dateInMillis;
 
     public Timestamp() {
-
+        if (date != null) {
+            this.dateInMillis = date.getTime();
+        }
     }
 
     public Timestamp(String value) throws WaybackTimestampParseException {
         this.originalValue = value;
         this.date = parseDate(value);
+        this.dateInMillis = date.getTime();
     }
 
     private static Date parseDate(String value) throws WaybackTimestampParseException {
@@ -74,6 +78,14 @@ public class Timestamp {
 
     public String getOriginalValue() {
         return originalValue;
+    }
+
+    public long getDateInMillis() {
+        return dateInMillis;
+    }
+
+    public void setDateInMillis(Long dateInMillis) {
+        this.dateInMillis = dateInMillis;
     }
 
     @Override
