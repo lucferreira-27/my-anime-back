@@ -58,7 +58,7 @@ A specialized web scraper for MyAnimeList, implementing the `ArchiveScraper` int
 
 ##  Workflow Diagram
 
-\```mermaid
+```mermaid
 sequenceDiagram
     participant Client
     participant Controller
@@ -76,7 +76,7 @@ sequenceDiagram
     MyAnimeListScraper->>MyAnimeListScraper: extractData(Document, target)
     MyAnimeListScraper-->>Controller: MediaState
     Controller-->>Client: Response with anime/manga data
-\```
+```
 
 ---
 
