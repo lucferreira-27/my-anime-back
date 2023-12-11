@@ -14,7 +14,7 @@ public interface ResponseSnapshotRepository extends JpaRepository<ResponseSnapsh
     // Retrieve a record by its ID
     Optional<ResponseSnapshot> findById(Long id);
 
-    List<ResponseSnapshot> findByUrl(String url);
+    ResponseSnapshot findByUrl(String url);
 
     List<ResponseSnapshot> findAllByMalId(Long malId);
 

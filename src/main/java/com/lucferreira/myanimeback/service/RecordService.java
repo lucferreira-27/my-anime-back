@@ -23,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -241,16 +242,26 @@ public class RecordService {
 
         Media media = mediaService.getFullMediaByUrl(instantArchiveRequest.getMalUrl());
         List<MediaRecord> records = recordRepository.findAllByMedia(media);
+
         if (records.isEmpty()) {
+            List<ResponseSnapshot> responseSnapshots = waybackService.getSnapshotList(media).stream()
+                    .filter(snapshot -> {
+                        return instantArchiveRequest.getUrls().contains(snapshot.getUrl());
+                    }).collect(Collectors.toList());
             List<MediaRecord> newRecords = createRecordsSync(instantArchiveRequest.getUrls(), media);
+            for (ResponseSnapshot responseSnapshot : responseSnapshots) {
+                for (MediaRecord mediaRecord : newRecords) {
+                    if(mediaRecord.getArchiveUrl().equals(responseSnapshot.getUrl())){
+                        mediaRecord.setResponseSnapshot(responseSnapshot);
+                    }
+                }
+            }
             createMediaRecords(new ArchiveRequest(instantArchiveRequest.getMalUrl()));
             return newRecords;
         }
         List<MediaRecord> filteredRecords = records.stream()
                 .filter(record -> instantArchiveRequest.getUrls().contains(record.getArchiveUrl()))
                 .collect(Collectors.toList());
-
-        filteredRecords.stream().filter(r -> r.getResponseSnapshot() == null);
         return filteredRecords;
     }
 
